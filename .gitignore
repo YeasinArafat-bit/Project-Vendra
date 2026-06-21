@@ -1,0 +1,34 @@
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual Environments
+.venv/
+.venv_vendra/
+env/
+venv/
+ENV/
+
+# Environment Variables (Sensitive Keys)
+.env
+
+# Local Databases (SQLite & Vector db)
+vendra.db
+vendra.db-journal
+chroma_db/
+
+# Streamlit config/cache
+.streamlit/
+
+# Generated static image assets
+static/images/
+
+# System / IDE files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
