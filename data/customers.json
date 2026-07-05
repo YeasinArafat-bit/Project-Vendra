@@ -1,0 +1,18 @@
+[
+  {
+    "id": "C001",
+    "name": "Alice Test",
+    "email": "alice@test.com",
+    "phone": "123",
+    "address": "Alice St",
+    "store_credit": 0.0
+  },
+  {
+    "id": "C002",
+    "name": "Bob Test",
+    "email": "bob@test.com",
+    "phone": "456",
+    "address": "Bob St",
+    "store_credit": 0.0
+  }
+]

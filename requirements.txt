@@ -17,3 +17,4 @@ pytest-asyncio
 requests
 pillow
 langchain-google-genai
+langchain-groq
