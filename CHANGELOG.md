@@ -4,6 +4,115 @@ This changelog summarizes the modifications made to Vendra's conversational comm
 
 ---
 
+## [2026-08-06] PHASE 7 — Professional Next.js Frontend
+
+### Added
+- Created a fully decoupled web application in the `frontend` folder using Next.js (App Router), TypeScript, and Tailwind CSS.
+- Implemented a secure Auth Gateway with Login and Signup views that persists and manages stateless JWT tokens in localStorage.
+- Built a dual-pane conversational customer workspace:
+  - Left Pane: Dynamic chat history with message bubbles, loading indicators, auto-scroll, and visual search (CLIP) photo uploader (with inline base64 serialization).
+  - Right Pane: Tabs for shopping cart items (supporting inline item removal and subtotal calculations), order lists (displaying courier tracking timelines and payment shortcuts), profile information, and the admin control center.
+- Integrated a mock Stripe payment webhook trigger in the order timeline, enabling users to simulate payments on pending checkouts.
+- Built an Admin Refund Review Panel that connects to `/api/refunds/pending` using the server's `ADMIN_API_KEY`, supporting inline Approve/Deny actions.
+- Configured optimized standalone Next.js builds and packaged the frontend application into a custom production Docker container.
+- Updated `docker-compose.yml` to incorporate the Next.js service on port 3000 with a custom Node-based healthcheck.
+
+---
+
+## [2026-08-06] PHASE 6 — Safety, Authentication, & Hardening
+
+### Added
+- Integrated stateless JWT session tokens using `pyjwt` (HS256 algorithm with 24-hour expiration) and enforced fail-fast startup checks for `JWT_SECRET_KEY` in `config.py`.
+- Refactored all customer mutations and info endpoints (`/api/chat`, `/api/orders`, `/api/cart/*`) to resolve and override the `customer_id` server-side via the authenticated token dependency, blocking cross-customer access with a `403 Forbidden` error.
+- Enforced a strict rate limit of 5 requests per minute per IP on `POST /api/auth/login` to prevent brute-forcing.
+- Added input parameter validators (`validate_product_id`, `validate_order_id`, `validate_shoe_size` using safe regex filters) to all tools in `agent/tools.py` to prevent SQL/command injection.
+- Hardened the model's system prompts in `agent/graph.py` and `agent/prompts.py` to protect against adversarial injection.
+- Added XSS sanitization (`html.escape()`) on dynamic product fields inside `app.py` card rendering.
+- Implemented a 3,000-character input limit on `/api/chat` to protect against buffer stuffing.
+- Enabled production mock webhook locks on `/webhook/stripe` and global exception sanitization to return clean `500` status codes.
+- Added comprehensive security checks in `tests/test_scalability.py` confirming that `GET /api/customers` is deleted (returns `404`) and `password_hash` fields are popped from all API payloads.
+
+---
+
+## [2026-08-05] PHASE 3 — Scalability for Concurrent & Production Load
+
+### Added
+- Decoupled the frontend and backend by introducing new REST API endpoints in [main.py](file:///G:/Project%20Vendra/main.py) for cart management (`GET /api/cart/{id}`, `POST /api/cart/{id}/add`, `POST /api/cart/{id}/remove`), customer data retrieval (`GET /api/customers`, `GET /api/customers/{id}`), product detail querying (`GET /api/products/{id}/details`), inventory status checks (`GET /api/inventory`), order histories (`GET /api/orders`), and chat interactions (`POST /api/chat`).
+- Refactored [app.py](file:///G:/Project%20Vendra/app.py) to communicate with the backend exclusively over HTTP, removing all direct backend and database imports (`agent.tools`, `agent.graph`, `CARTS`, `adapter`, `confirm_payment`) and ensuring complete process isolation.
+- Implemented `RedisCartProxy` in [agent/tools.py](file:///G:/Project%20Vendra/agent/tools.py) which stores shopping carts in Redis (`vendra:cart:{customer_id}`) with a 24-hour expiration TTL.
+- Added a fail-safe fallback mechanism: if `REDIS_URL` is unset or connection fails, the cart storage automatically falls back to local in-process memory.
+- Integrated a Cache-Aside read performance optimization in [agent/tools.py](file:///G:/Project%20Vendra/agent/tools.py) for product catalog reads (`search_products`, `get_product_details`). Includes immediate cache invalidation on order checkout and order cancellation approvals. Caching silently no-ops when Redis is offline.
+- Added rate-limiting policies using `slowapi` on all HTTP routes, including `/api/chat` (60 req/min), `/webhook/stripe` (120 req/min), and admin endpoints (30 req/min).
+- Introduced a multi-worker SQLite startup guard in [main.py](file:///G:/Project%20Vendra/main.py) warning users that SQLite does not support concurrent multi-process writes. Updated the concurrency documentation in [README.md](file:///G:/Project%20Vendra/README.md).
+- Created a comprehensive test suite in [tests/test_scalability.py](file:///G:/Project%20Vendra/tests/test_scalability.py) verifying Redis connection fallbacks, cache no-ops, the new HTTP chat API, and SQLite worker warnings.
+- Wrote a load testing configuration in [load_test.js](file:///G:/Project%20Vendra/load_test.js) using the **k6** framework to test concurrent chat turns and latency targets.
+
+---
+
+## [2026-08-05] PHASE 2 — Human-in-the-Loop Refund Approval
+
+### Added
+- Implemented human-in-the-loop validation for all refund and cancellation requests, introducing a review queue database.
+- Added a `RefundRequest` SQLAlchemy model in [adapters/models.py](file:///G:/Project%20Vendra/adapters/models.py) and generated the migration using Alembic.
+- Implemented CRUD adapter functions in `BaseAdapter`, `JSONAdapter`, and `PostgresAdapter` to manage refund requests in database.
+- Refactored the `cancel_order` tool in [agent/tools.py](file:///G:/Project%20Vendra/agent/tools.py) to queue requests with a `pending_review` status instead of executing direct refunds/mutations immediately.
+- Integrated a persistent `SqliteSaver` checkpointer in [agent/graph.py](file:///G:/Project%20Vendra/agent/graph.py) using a direct global SQLite connection to avoid closure issues.
+- Structured the master graph with a two-stage routing pattern: `cancellation` (runs subgraph and returns tool output) -> `approval` (calls `interrupt()` to pause, then processes decisions).
+- Created secure FastAPI backend endpoints in [main.py](file:///G:/Project%20Vendra/main.py) for listing (`GET /api/refunds/pending`), approving (`POST /api/refunds/{id}/approve`), and denying (`POST /api/refunds/{id}/deny`) requests.
+- Protected admin endpoints via strict `X-Admin-API-Key` header authentication, removing hardcoded defaults and returning a clear `401 Unauthorized` response on invalid keys.
+- Enforced a fail-closed application startup check in [main.py](file:///G:/Project%20Vendra/main.py) that validates `ADMIN_API_KEY` presence and raises a `RuntimeError` if unset, preventing the application from initializing with unconfigured keys.
+- Documented `ADMIN_API_KEY` requirements and generation details (e.g. `openssl rand -hex 32`) in [.env.example](file:///G:/Project%20Vendra/.env.example).
+- Expanded the Streamlit application in [app.py](file:///G:/Project%20Vendra/app.py) to include an Admin Approval Dashboard, allowing admins to enter key, view pending requests, write review notes, and approve/deny requests.
+- Created a comprehensive test suite in [tests/test_refund_approval.py](file:///G:/Project%20Vendra/tests/test_refund_approval.py) validating the complete pause-and-resume workflow, including a regression test (`test_app_fails_startup_without_admin_api_key`) to confirm startup blocks on missing keys.
+- Declared stubs in `ShopifyAdapter` to ensure compatibilty and avoid Pydantic/OOP instantiation errors.
+- Modified adversarial tests in [tests/test_adversarial.py](file:///G:/Project%20Vendra/tests/test_adversarial.py) to incorporate simulated admin approval flow, ensuring full regression coverage.
+
+---
+
+## [2026-08-05] PHASE 1 — Multi-agent architecture with fault isolation & Store Credit Fix
+
+### Added
+- Split monolithic `agent/graph.py` into five specialized sub-agents implemented as independent LangGraph subgraphs:
+  - **Catalog Agent**: Tool access restricted to `search_products`, `search_products_by_image`, `check_stock`, `get_product_details`.
+  - **Order & Tracking Agent**: Tool access restricted to `track_order` and the new read-only `get_order_status` tool.
+  - **Refund & Cancellation Agent**: Tool access restricted to `check_cancellation_eligibility`, `cancel_order`, and `retrieve_policy_text`.
+  - **Checkout & Payment Agent**: Tool access restricted to `add_to_cart`, `view_cart`, `remove_from_cart`, `create_order`, `create_payment_link`.
+  - **General Agent**: Greeting handling and policy question lookups using `retrieve_policy_text`.
+- Introduced a new `get_order_status` tool in [agent/tools.py](file:///G:/Project%20Vendra/agent/tools.py) to look up order items, status, and price details securely.
+- Implemented try/except fault-isolation boundaries inside Orchestrator wrapper nodes to prevent sub-agent errors from crashing the main session.
+- Added `tenacity` retry loops and `pybreaker` circuit breakers (`llm_breaker`, `stripe_breaker`, `db_breaker`) to handle transient failures gracefully.
+- Created a proxy class `CircuitBreakerAdapterProxy` in [agent/tools.py](file:///G:/Project%20Vendra/agent/tools.py) to wrap database adapter calls automatically.
+- Added unit tests in [tests/test_fault_isolation.py](file:///G:/Project%20Vendra/tests/test_fault_isolation.py) to verify sub-agent isolation and circuit breaker tripping.
+
+### Fixed
+- Resolved a critical database inconsistency bug where seeded customer balances were lost from `get_store_credit` after writing to `StoreCreditLedger`.
+- Updated `@customers.setter` to populate `StoreCreditLedger` with `"Initial seeded balance"` for non-zero store credit fields during database initialization and seeding.
+- Added `test_store_credit_seeded_with_additional` in [tests/test_postgres_adapter.py](file:///G:/Project%20Vendra/tests/test_postgres_adapter.py) to prevent regressions.
+- Restricted the `@retry` decorator on database adapter calls in [agent/tools.py](file:///G:/Project%20Vendra/agent/tools.py) to fire only on transient connection errors (`OperationalError`, `DBAPIError`, `TimeoutError`), preventing business-rule rejections from causing multi-second latency.
+- Refactored exception blocks in [adapters/postgres_adapter.py](file:///G:/Project%20Vendra/adapters/postgres_adapter.py) (`create_order`, `issue_store_credit`, `cancel_order`, etc.) to let `ValueError` and connection errors propagate natively rather than being masked as generic errors.
+- Optimized `_call_llm_with_retry` in [agent/graph.py](file:///G:/Project%20Vendra/agent/graph.py) using a custom `is_transient_llm_exception` filter to bypass retries on permanent failures like bad request payloads.
+- Added `test_create_order_insufficient_stock_fails_fast` in [tests/test_fault_isolation.py](file:///G:/Project%20Vendra/tests/test_fault_isolation.py) to verify that out-of-stock orders fail fast (under 0.5s) without retries.
+
+---
+
+## [2026-08-04] PHASE 0 — Database migration (JSON files → PostgreSQL)
+
+### Added
+- Created SQLAlchemy models in [adapters/models.py](file:///G:/Project%20Vendra/adapters/models.py) mapping all Vendra entities (`products`, `product_inventory`, `customers`, `orders`, `order_items`, `tracking`, `tracking_events`, `promotions`, and `store_credit_ledger`).
+- Integrated append-only tracking of customer credit changes in the `store_credit_ledger` table.
+- Initialized Alembic migrations and successfully generated/applied the initial schema migration (`56cae2f58354_initial_schema.py`).
+- Implemented [adapters/postgres_adapter.py](file:///G:/Project%20Vendra/adapters/postgres_adapter.py) conforming to `BaseAdapter` with thread-locking for SQLite compatibility.
+- Implemented `DBDictProxy` to support backward compatibility with dict-based mutations used in testing.
+- Created unit tests in [tests/test_postgres_adapter.py](file:///G:/Project%20Vendra/tests/test_postgres_adapter.py) to verify the append-only ledger transaction behavior.
+
+### Changed
+- Modified [adapters/__init__.py](file:///G:/Project%20Vendra/adapters/__init__.py) to load `PostgresAdapter` when `ADAPTER=postgres`.
+- Updated [.env.example](file:///G:/Project%20Vendra/.env.example) and local [.env](file:///G:/Project%20Vendra/.env) to set `ADAPTER=postgres` and define `DATABASE_URL` by default.
+- Updated [config.py](file:///G:/Project%20Vendra/config.py) to validate the database connection dynamically at startup.
+- Updated [seed.py](file:///G:/Project%20Vendra/seed.py) to automatically seed the database using JSON catalog files during startup.
+
+---
+
 ## 🔴 Priority 1 — Security Fixes
 
 ### 1. Secure Stripe Webhook Validation

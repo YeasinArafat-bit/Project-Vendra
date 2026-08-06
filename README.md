@@ -82,10 +82,10 @@ streamlit run app.py
 ## Thread-Safety and Concurrency Note
 
 > [!WARNING]
-> The default `JSONAdapter` implementation coordinates thread-safety using an in-memory python `threading.Lock`. 
-> While this works perfectly for single-process deployments (such as Uvicorn running with `--workers 1`), it will **not** synchronize state updates across multiple worker processes or distributed environments. 
+> The default `JSONAdapter` and SQLite database/SqliteSaver configuration coordinate thread-safety using in-memory and file-level locking. 
+> While this works perfectly for single-process deployments (such as Uvicorn running with `--workers 1`), running multiple worker processes against the `JSONAdapter` or SQLite database will lead to concurrent write contentions and database lock errors.
 > 
-> If you deploy Vendra with multiple processes, you must migrate from the `JSONAdapter` to the production-ready `ShopifyAdapter` or `WooCommerceAdapter` (which leverage external database transactions for thread-safety and concurrency coordination).
+> If you deploy Vendra with multiple processes (e.g., `--workers > 1`), you must configure `ADAPTER=postgres` and map a real PostgreSQL database to ensure safe concurrent transaction handling.
 
 ---
 

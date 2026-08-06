@@ -4,219 +4,1337 @@
     "name": "Classic Leather Oxford",
     "description": "Handcrafted premium Italian leather dress shoes. Elegant, polished, and timeless for professional settings, offices, and weddings.",
     "category": "formal",
-    "occasion_tags": ["formal", "office", "wedding", "business"],
-    "mood_tags": ["elegant", "professional", "classic", "polished"],
+    "occasion_tags": [
+      "formal",
+      "office",
+      "wedding",
+      "business"
+    ],
+    "mood_tags": [
+      "elegant",
+      "professional",
+      "classic",
+      "polished"
+    ],
     "price": 4500.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=400"
+    "image_url": "/static/images/classic_leather_oxford.png"
   },
   {
     "id": "P002",
     "name": "Midnight Velvet Derby",
     "description": "Sleek velvet dress shoes with a subtle sheen, perfect for black-tie galas and evening weddings.",
     "category": "formal",
-    "occasion_tags": ["wedding", "formal", "party", "gala"],
-    "mood_tags": ["elegant", "bold", "premium", "luxury"],
+    "occasion_tags": [
+      "wedding",
+      "formal",
+      "party",
+      "gala"
+    ],
+    "mood_tags": [
+      "elegant",
+      "bold",
+      "premium",
+      "luxury"
+    ],
     "price": 5500.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=400"
+    "image_url": "/static/images/midnight_velvet_derby.png"
   },
   {
     "id": "P003",
     "name": "CloudWalk Runner",
     "description": "Breathable mesh running shoes with cloud-like foam cushioning for ultimate athletic comfort.",
     "category": "sport",
-    "occasion_tags": ["sport", "running", "workout", "casual"],
-    "mood_tags": ["comfortable", "active", "lightweight"],
+    "occasion_tags": [
+      "sport",
+      "running",
+      "workout",
+      "casual"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "active",
+      "lightweight"
+    ],
     "price": 3200.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400"
+    "image_url": "/static/images/cloudwalk_runner.png"
   },
   {
     "id": "P004",
     "name": "TrailBlaze Hiker",
     "description": "Rugged, waterproof hiking shoes with a high-grip rubber outsole for all-terrain adventure.",
     "category": "sport",
-    "occasion_tags": ["sport", "hiking", "outdoor", "adventure"],
-    "mood_tags": ["durable", "rugged", "protective"],
+    "occasion_tags": [
+      "sport",
+      "hiking",
+      "outdoor",
+      "adventure"
+    ],
+    "mood_tags": [
+      "durable",
+      "rugged",
+      "protective"
+    ],
     "price": 4200.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400"
+    "image_url": "/static/images/trailblaze_hiker.png"
   },
   {
     "id": "P005",
     "name": "Urban Comfort Sneaker",
     "description": "Minimalist everyday sneakers made of organic cotton canvas. Versatile, clean, and lightweight.",
     "category": "casual",
-    "occasion_tags": ["casual", "travel", "daily"],
-    "mood_tags": ["comfortable", "minimal", "clean", "simple"],
+    "occasion_tags": [
+      "casual",
+      "travel",
+      "daily"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "minimal",
+      "clean",
+      "simple"
+    ],
     "price": 2800.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400"
+    "image_url": "/static/images/urban_comfort_sneaker.png"
   },
   {
     "id": "P006",
     "name": "Veloce Athletic Trainer",
     "description": "High-performance training shoes built with responsive support for gym and CrossFit workouts.",
     "category": "sport",
-    "occasion_tags": ["sport", "gym", "crossfit"],
-    "mood_tags": ["bold", "energetic", "stable"],
+    "occasion_tags": [
+      "sport",
+      "gym",
+      "crossfit"
+    ],
+    "mood_tags": [
+      "bold",
+      "energetic",
+      "stable"
+    ],
     "price": 3600.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400"
+    "image_url": "/static/images/veloce_athletic_trainer.png"
   },
   {
     "id": "P007",
     "name": "Sunset Leather Sandal",
     "description": "Hand-stitched premium leather sandals with an ergonomic footbed for effortless beach-to-street walks.",
     "category": "sandals",
-    "occasion_tags": ["casual", "beach", "summer", "travel"],
-    "mood_tags": ["comfortable", "relaxed", "breezy"],
+    "occasion_tags": [
+      "casual",
+      "beach",
+      "summer",
+      "travel"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "relaxed",
+      "breezy"
+    ],
     "price": 2200.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400"
+    "image_url": "/static/images/sunset_leather_sandal.png"
   },
   {
     "id": "P008",
     "name": "Metro Slip-on",
     "description": "Easy slip-on canvas shoes. Perfect for quick errands, lounging, and lazy Sunday strolls.",
     "category": "casual",
-    "occasion_tags": ["casual", "daily", "lounging"],
-    "mood_tags": ["comfortable", "relaxed", "convenient"],
+    "occasion_tags": [
+      "casual",
+      "daily",
+      "lounging"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "relaxed",
+      "convenient"
+    ],
     "price": 2400.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400"
+    "image_url": "/static/images/metro_slip-on.png"
   },
   {
     "id": "P009",
     "name": "Gladiator Strap Sandal",
     "description": "Fashion-forward strappy sandals with adjustable buckles for a bold summer statement.",
     "category": "sandals",
-    "occasion_tags": ["casual", "summer", "festival", "party"],
-    "mood_tags": ["bold", "stylish", "trendy"],
+    "occasion_tags": [
+      "casual",
+      "summer",
+      "festival",
+      "party"
+    ],
+    "mood_tags": [
+      "bold",
+      "stylish",
+      "trendy"
+    ],
     "price": 2500.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400"
+    "image_url": "/static/images/gladiator_strap_sandal.png"
   },
   {
     "id": "P010",
     "name": "Elite Chelsea Boot",
     "description": "Sleek suede Chelsea boots with elastic side panels. Bridges the gap between casual and formal.",
     "category": "formal",
-    "occasion_tags": ["formal", "casual", "office", "evening"],
-    "mood_tags": ["elegant", "stylish", "modern"],
+    "occasion_tags": [
+      "formal",
+      "casual",
+      "office",
+      "evening"
+    ],
+    "mood_tags": [
+      "elegant",
+      "stylish",
+      "modern"
+    ],
     "price": 5800.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1544441893-675973e31985?w=400"
+    "image_url": "/static/images/elite_chelsea_boot.png"
   },
   {
     "id": "P011",
     "name": "WaveBreeze Active Slide",
     "description": "Waterproof, cushioned slip-on slides, ideal for pool-side lounging or post-workout recovery.",
     "category": "sandals",
-    "occasion_tags": ["casual", "pool", "beach", "recovery"],
-    "mood_tags": ["comfortable", "casual", "lightweight"],
+    "occasion_tags": [
+      "casual",
+      "pool",
+      "beach",
+      "recovery"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "casual",
+      "lightweight"
+    ],
     "price": 1600.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400"
+    "image_url": "/static/images/wavebreeze_active_slide.png"
   },
   {
     "id": "P012",
     "name": "Brogue Heritage Boot",
     "description": "Classic wingtip brogue dress boots in rich tan grain leather with intricate perforation details.",
     "category": "formal",
-    "occasion_tags": ["wedding", "formal", "winter"],
-    "mood_tags": ["elegant", "classic", "premium", "detailed"],
+    "occasion_tags": [
+      "wedding",
+      "formal",
+      "winter"
+    ],
+    "mood_tags": [
+      "elegant",
+      "classic",
+      "premium",
+      "detailed"
+    ],
     "price": 6400.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1544441893-675973e31985?w=400"
+    "image_url": "/static/images/brogue_heritage_boot.png"
   },
   {
     "id": "P013",
     "name": "Retro Street High-Top",
     "description": "Vintage-inspired high-top leather sneakers with a rubber toe cap and padded ankle collar.",
     "category": "casual",
-    "occasion_tags": ["casual", "street", "concert"],
-    "mood_tags": ["bold", "retro", "trendy"],
+    "occasion_tags": [
+      "casual",
+      "street",
+      "concert"
+    ],
+    "mood_tags": [
+      "bold",
+      "retro",
+      "trendy"
+    ],
     "price": 3400.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400"
+    "image_url": "/static/images/retro_street_high-top.png"
   },
   {
     "id": "P014",
     "name": "FlexFit Knit Sneaker",
     "description": "Sock-like stretch knit sneakers that mold to your feet. The ultimate lightweight walking shoe.",
     "category": "casual",
-    "occasion_tags": ["casual", "travel", "walking"],
-    "mood_tags": ["comfortable", "minimal", "flexible"],
+    "occasion_tags": [
+      "casual",
+      "travel",
+      "walking"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "minimal",
+      "flexible"
+    ],
     "price": 3100.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400"
+    "image_url": "/static/images/flexfit_knit_sneaker.png"
   },
   {
     "id": "P015",
     "name": "Patent Gala Pump",
     "description": "Ultra-glossy black patent leather formal shoes designed for weddings and black-tie ceremonies.",
     "category": "formal",
-    "occasion_tags": ["wedding", "formal", "gala", "ballroom"],
-    "mood_tags": ["elegant", "polished", "premium", "luxury"],
+    "occasion_tags": [
+      "wedding",
+      "formal",
+      "gala",
+      "ballroom"
+    ],
+    "mood_tags": [
+      "elegant",
+      "polished",
+      "premium",
+      "luxury"
+    ],
     "price": 5200.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400"
+    "image_url": "/static/images/patent_gala_pump.png"
   },
   {
     "id": "P016",
     "name": "Bridal Satin Heels",
     "description": "Stunning white satin stilettos featuring pearl embellishments. Designed for brides seeking glamour on their wedding day.",
     "category": "wedding",
-    "occasion_tags": ["wedding", "party"],
-    "mood_tags": ["elegant", "romantic", "glamorous"],
+    "occasion_tags": [
+      "wedding",
+      "party"
+    ],
+    "mood_tags": [
+      "elegant",
+      "romantic",
+      "glamorous"
+    ],
     "price": 6800.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400"
+    "image_url": "/static/images/p016_bridal_satin_heels.jpg"
   },
   {
     "id": "P017",
     "name": "Gilded Block Sandals",
     "description": "Shimmering metallic gold block heel sandals with an ankle strap. Elegant and bold, ideal for wedding guest outfits.",
     "category": "wedding",
-    "occasion_tags": ["wedding", "party", "travel"],
-    "mood_tags": ["bold", "glamorous", "playful"],
+    "occasion_tags": [
+      "wedding",
+      "party",
+      "travel"
+    ],
+    "mood_tags": [
+      "bold",
+      "glamorous",
+      "playful"
+    ],
     "price": 3800.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400"
+    "image_url": "/static/images/p017_gilded_block_sandals.jpg"
   },
   {
     "id": "P018",
     "name": "Summit Mountaineer Boot",
     "description": "Heavy-duty waterproof mountaineering boots with thick traction soles and deep support for winter hiking.",
     "category": "sport",
-    "occasion_tags": ["sport", "hiking", "travel"],
-    "mood_tags": ["rugged", "comfortable", "durable"],
+    "occasion_tags": [
+      "sport",
+      "hiking",
+      "travel"
+    ],
+    "mood_tags": [
+      "rugged",
+      "comfortable",
+      "durable"
+    ],
     "price": 7200.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1544441893-675973e31985?w=400"
+    "image_url": "/static/images/p018_summit_mountaineer_boot.jpg"
   },
   {
     "id": "P019",
     "name": "Tassel Loafer Classic",
     "description": "Timeless brown leather loafers with sophisticated tassel details. Ideal for office and smart-casual wear.",
     "category": "formal",
-    "occasion_tags": ["formal", "office", "everyday"],
-    "mood_tags": ["elegant", "professional", "minimal"],
+    "occasion_tags": [
+      "formal",
+      "office",
+      "everyday"
+    ],
+    "mood_tags": [
+      "elegant",
+      "professional",
+      "minimal"
+    ],
     "price": 4900.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400"
+    "image_url": "/static/images/p019_tassel_loafer_classic.jpg"
   },
   {
     "id": "P020",
     "name": "Capri Cork Slide",
     "description": "Breezy linen slip-on slides with lightweight jute-wrapped cork soles. Designed for warm summer beach days.",
     "category": "casual",
-    "occasion_tags": ["casual", "beach", "travel"],
-    "mood_tags": ["minimal", "comfortable", "playful"],
+    "occasion_tags": [
+      "casual",
+      "beach",
+      "travel"
+    ],
+    "mood_tags": [
+      "minimal",
+      "comfortable",
+      "playful"
+    ],
     "price": 1800.0,
     "currency": "BDT",
-    "image_url": "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400"
+    "image_url": "/static/images/p020_capri_cork_slide.jpg"
+  },
+  {
+    "id": "P021",
+    "name": "Monarch Dress Oxford",
+    "description": "Handcrafted black dress oxford with cap-toe stitching, premium leather outsole.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "office",
+      "wedding"
+    ],
+    "mood_tags": [
+      "elegant",
+      "classic",
+      "polished"
+    ],
+    "price": 5400.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P021_monarch_dress_oxford.jpg"
+  },
+  {
+    "id": "P022",
+    "name": "Imperial Monk Strap",
+    "description": "Sleek double monk strap shoe in chestnut calfskin leather with polished buckles.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "office",
+      "dinner"
+    ],
+    "mood_tags": [
+      "elegant",
+      "bold",
+      "luxury"
+    ],
+    "price": 6200.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P022_imperial_monk_strap.jpg"
+  },
+  {
+    "id": "P023",
+    "name": "Sterling Chelsea Boot",
+    "description": "Polished black leather Chelsea boot with elastic panels, pull tab, slim profile.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "casual",
+      "evening"
+    ],
+    "mood_tags": [
+      "elegant",
+      "stylish",
+      "modern"
+    ],
+    "price": 6600.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P023_sterling_chelsea_boot.jpg"
+  },
+  {
+    "id": "P024",
+    "name": "Sovereign Derby",
+    "description": "Traditional open-lacing Derby shoe in burnished tan leather with subtle brogue details.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "office",
+      "casual"
+    ],
+    "mood_tags": [
+      "classic",
+      "professional",
+      "comfortable"
+    ],
+    "price": 4700.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P024_sovereign_derby.jpg"
+  },
+  {
+    "id": "P025",
+    "name": "Regal Tassel Loafer",
+    "description": "Classic slip-on tassel loafer in oxblood leather, hand-stitched detailing, comfortable fit.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "office",
+      "gala"
+    ],
+    "mood_tags": [
+      "elegant",
+      "premium",
+      "classic"
+    ],
+    "price": 5100.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P025_regal_tassel_loafer.jpg"
+  },
+  {
+    "id": "P026",
+    "name": "Classic Wingtip",
+    "description": "Traditional wingtip brogues with perforated detailing in a textured dark brown finish.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "wedding",
+      "business"
+    ],
+    "mood_tags": [
+      "elegant",
+      "classic",
+      "detailed"
+    ],
+    "price": 5300.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P026_classic_wingtip.jpg"
+  },
+  {
+    "id": "P027",
+    "name": "Broadstreet Brogue",
+    "description": "Heavyweight smart brogue shoe with double leather sole, perfect for daily office wear.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "office"
+    ],
+    "mood_tags": [
+      "durable",
+      "professional",
+      "classic"
+    ],
+    "price": 4950.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P027_broadstreet_brogue.jpg"
+  },
+  {
+    "id": "P028",
+    "name": "Urban Wingtip Oxford",
+    "description": "Modern oxfords featuring wingtip perforations and a slim flexible rubber sole.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "casual",
+      "office"
+    ],
+    "mood_tags": [
+      "modern",
+      "comfortable",
+      "stylish"
+    ],
+    "price": 4600.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P028_urban_wingtip_oxford.jpg"
+  },
+  {
+    "id": "P029",
+    "name": "Legacy Dress Boot",
+    "description": "Sleek lace-up dress boots in premium black grain leather, dressy yet supportive.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "winter",
+      "evening"
+    ],
+    "mood_tags": [
+      "elegant",
+      "rugged",
+      "polished"
+    ],
+    "price": 6800.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P029_legacy_dress_boot.jpg"
+  },
+  {
+    "id": "P030",
+    "name": "Executive Derby",
+    "description": "Timeless professional black leather Derby shoe designed for comfort during long meetings.",
+    "category": "formal",
+    "occasion_tags": [
+      "formal",
+      "office",
+      "business"
+    ],
+    "mood_tags": [
+      "professional",
+      "comfortable",
+      "minimal"
+    ],
+    "price": 4300.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P030_executive_derby.jpg"
+  },
+  {
+    "id": "P031",
+    "name": "HyperDrive Runner",
+    "description": "High-performance running shoe with carbon fiber plate and reactive foam tech.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "running",
+      "marathon"
+    ],
+    "mood_tags": [
+      "active",
+      "fast",
+      "innovative"
+    ],
+    "price": 7800.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P031_hyperdrive_runner.jpg"
+  },
+  {
+    "id": "P032",
+    "name": "Sonic Volt Trainer",
+    "description": "Lightweight gym training shoes with breathable mesh and cross-traction outsole.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "gym",
+      "crossfit"
+    ],
+    "mood_tags": [
+      "active",
+      "energetic",
+      "stable"
+    ],
+    "price": 3900.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P032_sonic_volt_trainer.jpg"
+  },
+  {
+    "id": "P033",
+    "name": "Altitude Hiker",
+    "description": "Waterproof mid-cut hiking boot with breathable membrane and reinforced toe protection.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "hiking",
+      "outdoor"
+    ],
+    "mood_tags": [
+      "rugged",
+      "protective",
+      "durable"
+    ],
+    "price": 5600.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P033_altitude_hiker.jpg"
+  },
+  {
+    "id": "P034",
+    "name": "Nebula Knit Runner",
+    "description": "Stretch knit slip-on running shoes with cushioned responsive midsole.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "running",
+      "casual"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "lightweight",
+      "breezy"
+    ],
+    "price": 3300.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P034_nebula_knit_runner.jpg"
+  },
+  {
+    "id": "P035",
+    "name": "Titan Trail Boot",
+    "description": "Heavy-duty outdoor trail shoe with deep rubber lugs, protective mudguard.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "hiking",
+      "adventure"
+    ],
+    "mood_tags": [
+      "rugged",
+      "durable",
+      "stable"
+    ],
+    "price": 6100.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P035_titan_trail_boot.jpg"
+  },
+  {
+    "id": "P036",
+    "name": "Velocity Cross Trainer",
+    "description": "Supportive athletic trainers designed for lateral agility, HIIT, and training workouts.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "gym",
+      "workout"
+    ],
+    "mood_tags": [
+      "active",
+      "stable",
+      "bold"
+    ],
+    "price": 4100.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P036_velocity_cross_trainer.jpg"
+  },
+  {
+    "id": "P037",
+    "name": "Vortex Active Shoe",
+    "description": "Breathable mesh active sneakers featuring shock-absorbing gel heels.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "running",
+      "daily"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "active",
+      "flexible"
+    ],
+    "price": 3500.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P037_vortex_active_shoe.jpg"
+  },
+  {
+    "id": "P038",
+    "name": "Stratus Cushion Sneaker",
+    "description": "Max-cushioned running shoes with orthopedic insoles for joints protection.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "running",
+      "walking"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "supportive",
+      "lightweight"
+    ],
+    "price": 4800.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P038_stratus_cushion_sneaker.jpg"
+  },
+  {
+    "id": "P039",
+    "name": "Apex Grid Trainer",
+    "description": "Versatile athletic sneakers with mesh outer shell and secure lock-down lacing system.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "gym",
+      "court"
+    ],
+    "mood_tags": [
+      "active",
+      "stable",
+      "responsive"
+    ],
+    "price": 3800.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P039_apex_grid_trainer.jpg"
+  },
+  {
+    "id": "P040",
+    "name": "Summit Peak Boot",
+    "description": "Insulated waterproof winter hiking boots built for sub-zero mountain trails.",
+    "category": "sport",
+    "occasion_tags": [
+      "sport",
+      "hiking",
+      "travel"
+    ],
+    "mood_tags": [
+      "rugged",
+      "warm",
+      "protective"
+    ],
+    "price": 7900.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P040_summit_peak_boot.jpg"
+  },
+  {
+    "id": "P041",
+    "name": "Solace Canvas Slip-on",
+    "description": "Simple and breezy organic canvas slip-ons, padded collar, flexible sole.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "daily",
+      "lounging"
+    ],
+    "mood_tags": [
+      "relaxed",
+      "minimal",
+      "comfortable"
+    ],
+    "price": 1950.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P041_solace_canvas_slip_on.jpg"
+  },
+  {
+    "id": "P042",
+    "name": "District Retro Low",
+    "description": "Retro-style leather court sneaker with contrasting stripes, vintage vibes.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "street",
+      "daily"
+    ],
+    "mood_tags": [
+      "retro",
+      "stylish",
+      "bold"
+    ],
+    "price": 3700.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P042_district_retro_low.jpg"
+  },
+  {
+    "id": "P043",
+    "name": "Nomad Knit Sneaker",
+    "description": "Slip-on sneakers made of recycled ocean plastics, ultralight, packable design.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "travel",
+      "daily"
+    ],
+    "mood_tags": [
+      "minimal",
+      "flexible",
+      "comfortable"
+    ],
+    "price": 3200.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P043_nomad_knit_sneaker.jpg"
+  },
+  {
+    "id": "P044",
+    "name": "Voyager Suede Slip-on",
+    "description": "Premium soft suede loafers with collapsible heels for versatile daily wear.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "travel",
+      "lounging"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "relaxed",
+      "premium"
+    ],
+    "price": 4200.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P044_voyager_suede_slip_on.jpg"
+  },
+  {
+    "id": "P045",
+    "name": "Cruiser Daily Sneaker",
+    "description": "Clean white leather sneakers, simple profile, padded footbed, versatile matching.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "daily",
+      "work"
+    ],
+    "mood_tags": [
+      "clean",
+      "minimal",
+      "simple"
+    ],
+    "price": 2900.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P045_cruiser_daily_sneaker.jpg"
+  },
+  {
+    "id": "P046",
+    "name": "Downtown High-Top",
+    "description": "Urban canvas high-top sneakers with vulcanized rubber sole and vintage laces.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "street",
+      "concert"
+    ],
+    "mood_tags": [
+      "stylish",
+      "retro",
+      "bold"
+    ],
+    "price": 2600.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P046_downtown_high_top.jpg"
+  },
+  {
+    "id": "P047",
+    "name": "Aero Canvas Low",
+    "description": "Breezy washed canvas sneakers with metal eyelets, perfect for warm summers.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "summer",
+      "daily"
+    ],
+    "mood_tags": [
+      "relaxed",
+      "breezy",
+      "simple"
+    ],
+    "price": 2100.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P047_aero_canvas_low.jpg"
+  },
+  {
+    "id": "P048",
+    "name": "Echo Knit Sneaker",
+    "description": "Modern knit sneakers with futuristic heel design and breathable weave.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "street",
+      "daily"
+    ],
+    "mood_tags": [
+      "stylish",
+      "modern",
+      "comfortable"
+    ],
+    "price": 3600.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P048_echo_knit_sneaker.jpg"
+  },
+  {
+    "id": "P049",
+    "name": "Pathway Suede Trainer",
+    "description": "Casual lifestyle sneakers featuring soft suede panels and textured gum sole.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "daily",
+      "travel"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "classic",
+      "relaxed"
+    ],
+    "price": 3800.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P049_pathway_suede_trainer.jpg"
+  },
+  {
+    "id": "P050",
+    "name": "Terrace Classic Sneaker",
+    "description": "Iconic retro trainers with t-toe overlay, premium leather upper, sporty casual.",
+    "category": "casual",
+    "occasion_tags": [
+      "casual",
+      "street",
+      "daily"
+    ],
+    "mood_tags": [
+      "classic",
+      "retro",
+      "stylish"
+    ],
+    "price": 3400.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P050_terrace_classic_sneaker.jpg"
+  },
+  {
+    "id": "P051",
+    "name": "Gala Velvet Pump",
+    "description": "Luxe black velvet stiletto heels with gold inner lining and pointed toe design.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "gala",
+      "party"
+    ],
+    "mood_tags": [
+      "elegant",
+      "luxury",
+      "bold"
+    ],
+    "price": 5800.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P051_gala_velvet_pump.jpg"
+  },
+  {
+    "id": "P052",
+    "name": "Sparkle Stiletto",
+    "description": "Dazzling heels covered in micro-crystals, ideal for reception or evening wear.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "party",
+      "gala"
+    ],
+    "mood_tags": [
+      "glamorous",
+      "bold",
+      "luxury"
+    ],
+    "price": 7500.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P052_sparkle_stiletto.jpg"
+  },
+  {
+    "id": "P053",
+    "name": "Regal Pearl Heel",
+    "description": "Satin ivory block heels featuring elegant faux-pearl ankle strap decoration.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "party"
+    ],
+    "mood_tags": [
+      "elegant",
+      "romantic",
+      "delicate"
+    ],
+    "price": 6400.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P053_regal_pearl_heel.jpg"
+  },
+  {
+    "id": "P054",
+    "name": "Glitz Ankle Strap",
+    "description": "Elegant silver metallic heels with thin adjustable buckle ankle straps.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "party",
+      "dinner"
+    ],
+    "mood_tags": [
+      "glamorous",
+      "stylish",
+      "trendy"
+    ],
+    "price": 4600.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P054_glitz_ankle_strap.jpg"
+  },
+  {
+    "id": "P055",
+    "name": "Royal Satin Pump",
+    "description": "Classic white satin formal wedding pumps with cushioned silk insoles.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "gala"
+    ],
+    "mood_tags": [
+      "elegant",
+      "classic",
+      "romantic"
+    ],
+    "price": 5200.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P055_royal_satin_pump.jpg"
+  },
+  {
+    "id": "P056",
+    "name": "Diamond D'Orsay",
+    "description": "Pointed-toe D'Orsay pumps featuring crystal embellishments on the toe cap.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "party"
+    ],
+    "mood_tags": [
+      "luxury",
+      "glamorous",
+      "elegant"
+    ],
+    "price": 7200.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P056_diamond_d_orsay.jpg"
+  },
+  {
+    "id": "P057",
+    "name": "Golden Glam Slide",
+    "description": "Low block heel slides in metallic gold leather, elegant slip-on comfort.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "casual",
+      "party"
+    ],
+    "mood_tags": [
+      "glamorous",
+      "comfortable",
+      "playful"
+    ],
+    "price": 3900.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P057_golden_glam_slide.jpg"
+  },
+  {
+    "id": "P058",
+    "name": "Chandelier Heel",
+    "description": "Premium sandals with drop-down crystal strings draping from the ankle strap.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "gala",
+      "dinner"
+    ],
+    "mood_tags": [
+      "luxury",
+      "bold",
+      "glamorous"
+    ],
+    "price": 8400.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P058_chandelier_heel.jpg"
+  },
+  {
+    "id": "P059",
+    "name": "Enchanted Block Heel",
+    "description": "Soft lace overlay block heels, romantic look with modern walking stability.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "party",
+      "office"
+    ],
+    "mood_tags": [
+      "romantic",
+      "elegant",
+      "comfortable"
+    ],
+    "price": 4900.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P059_enchanted_block_heel.jpg"
+  },
+  {
+    "id": "P060",
+    "name": "Lace Elegance Stiletto",
+    "description": "High stiletto heel featuring fine white floral lace outer panels, classic bridal.",
+    "category": "wedding",
+    "occasion_tags": [
+      "wedding",
+      "gala"
+    ],
+    "mood_tags": [
+      "romantic",
+      "delicate",
+      "luxury"
+    ],
+    "price": 6900.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P060_lace_elegance_stiletto.jpg"
+  },
+  {
+    "id": "P061",
+    "name": "Breeze Active Slide",
+    "description": "Cushioned waterproof slide sandals, textured footbed, perfect post-sport.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "pool",
+      "recovery"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "simple",
+      "lightweight"
+    ],
+    "price": 1450.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P061_breeze_active_slide.jpg"
+  },
+  {
+    "id": "P062",
+    "name": "Sundance Cork Sandal",
+    "description": "Double-strap slide sandals with adjustable metal buckles, natural cork footbed.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "summer",
+      "travel"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "relaxed",
+      "classic"
+    ],
+    "price": 2300.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P062_sundance_cork_sandal.jpg"
+  },
+  {
+    "id": "P063",
+    "name": "Lagoon Strap Sandal",
+    "description": "Water-friendly webbing sandals with multi-point adjustable straps, outdoor active.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "beach",
+      "hiking"
+    ],
+    "mood_tags": [
+      "rugged",
+      "comfortable",
+      "protective"
+    ],
+    "price": 2600.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P063_lagoon_strap_sandal.jpg"
+  },
+  {
+    "id": "P064",
+    "name": "Riviera Jute Slide",
+    "description": "Elegant summer slides with woven jute straps and comfortable leather insoles.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "summer",
+      "beach"
+    ],
+    "mood_tags": [
+      "breezy",
+      "stylish",
+      "relaxed"
+    ],
+    "price": 2200.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P064_riviera_jute_slide.jpg"
+  },
+  {
+    "id": "P065",
+    "name": "Tropic Leather Slide",
+    "description": "Minimalist single-band slide sandal in soft tan leather, classic summer slide.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "summer",
+      "daily"
+    ],
+    "mood_tags": [
+      "minimal",
+      "comfortable",
+      "simple"
+    ],
+    "price": 2100.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P065_tropic_leather_slide.jpg"
+  },
+  {
+    "id": "P066",
+    "name": "Explorer Webbing Sandal",
+    "description": "Agile strappy outdoor sandals, high traction tread for river-side walking.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "outdoor",
+      "beach"
+    ],
+    "mood_tags": [
+      "rugged",
+      "comfortable",
+      "flexible"
+    ],
+    "price": 2500.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P066_explorer_webbing_sandal.jpg"
+  },
+  {
+    "id": "P067",
+    "name": "Sol Leather Sandal",
+    "description": "Cross-strap leather sandals with heel loop for secure summer city walks.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "daily",
+      "travel"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "relaxed",
+      "classic"
+    ],
+    "price": 2400.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P067_sol_leather_sandal.jpg"
+  },
+  {
+    "id": "P068",
+    "name": "Drift Comfort Slide",
+    "description": "Ergonomically contoured slide sandals with thick foam cushion, lightweight.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "daily",
+      "lounging"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "relaxed",
+      "lightweight"
+    ],
+    "price": 1700.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P068_drift_comfort_slide.jpg"
+  },
+  {
+    "id": "P069",
+    "name": "Marina Sport Slide",
+    "description": "Neoprene padded slide sandal with athletic white accent stripe, stylish slide.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "sport",
+      "pool"
+    ],
+    "mood_tags": [
+      "active",
+      "comfortable",
+      "stylish"
+    ],
+    "price": 1850.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P069_marina_sport_slide.jpg"
+  },
+  {
+    "id": "P070",
+    "name": "Shoreline Cork Sandal",
+    "description": "Soft suede footbed sandals with jute wrap, single-strap toe-post design.",
+    "category": "sandals",
+    "occasion_tags": [
+      "casual",
+      "summer",
+      "beach"
+    ],
+    "mood_tags": [
+      "comfortable",
+      "breezy",
+      "relaxed"
+    ],
+    "price": 2150.0,
+    "currency": "BDT",
+    "image_url": "/static/images/P070_shoreline_cork_sandal.jpg"
   }
 ]

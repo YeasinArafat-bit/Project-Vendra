@@ -177,10 +177,21 @@ def test_adversarial_ignore_instructions():
     assert elig_res["eligible"] is False
     assert elig_res["refund_type"] == "store_credit"
     
-    # Executing cancel_order returns store credit
+    # Executing cancel_order submits a request
     cancel_res = cancel_order.invoke({"order_id": "105", "customer_id": "C001"})
-    assert "Store Credit Issued" in cancel_res
-    assert "REFUNDED" not in cancel_res
+    assert "submitted for review" in cancel_res.lower()
+    
+    # Simulate admin approval
+    pending = adapter.get_pending_refund_requests()
+    req = [r for r in pending if r["order_id"] == "105"][0]
+    adapter.update_refund_request(req["id"], "approved", "admin", "Approved")
+    adapter.cancel_order("105")
+    adapter.issue_store_credit("C001", 100.00)
+    
+    # Verify order and store credit
+    order = adapter.get_order("105")
+    assert order["status"] == "cancelled"
+    assert adapter.get_store_credit("C001") == 100.00
 
 # 5. Chat message attempting to look up or cancel an order that belongs to a different customer ID -> must be refused
 def test_privacy_cross_customer_access():
@@ -333,10 +344,17 @@ def test_store_credit_balance_increment():
         "created_at": created_at.isoformat()
     }
     
-    # Cancel order should trigger store credit and update balance
+    # Cancel order should submit request
     initial_credit = adapter.get_store_credit("C001")
     cancel_res = cancel_order.invoke({"order_id": "110", "customer_id": "C001"})
-    assert "Store Credit Issued" in cancel_res or "store credit" in cancel_res.lower()
+    assert "submitted for review" in cancel_res.lower()
+    
+    # Simulate admin approval
+    pending = adapter.get_pending_refund_requests()
+    req = [r for r in pending if r["order_id"] == "110"][0]
+    adapter.update_refund_request(req["id"], "approved", "admin", "Approved")
+    adapter.cancel_order("110")
+    adapter.issue_store_credit("C001", 150.00)
     
     new_credit = adapter.get_store_credit("C001")
     assert new_credit == initial_credit + 150.00
@@ -360,6 +378,7 @@ def test_router_bengali_banglish_intent_detection():
 def test_adapter_error_propagation(monkeypatch):
     from adapters.shopify_adapter import ShopifyAdapter
     from adapters.base import AdapterError
+    import adapters
     
     def mock_get_products(*args, **kwargs):
         raise AdapterError("Mock Shopify API down")
@@ -370,6 +389,7 @@ def test_adapter_error_propagation(monkeypatch):
     from agent import tools
     old_adapter = tools.adapter
     tools.adapter = ShopifyAdapter()
+    monkeypatch.setattr(adapters, "get_adapter", lambda: tools.adapter)
     
     try:
         res = search_products.invoke({"query": "shoes"})

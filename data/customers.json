@@ -5,7 +5,8 @@
     "email": "alice@test.com",
     "phone": "123",
     "address": "Alice St",
-    "store_credit": 0.0
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
   },
   {
     "id": "C002",
@@ -13,6 +14,169 @@
     "email": "bob@test.com",
     "phone": "456",
     "address": "Bob St",
-    "store_credit": 0.0
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C003",
+    "name": "Imran Hossain",
+    "email": "imran@email.bd",
+    "phone": "01711223344",
+    "address": "Dhanmondi, Dhaka",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C004",
+    "name": "Fahmida Rahman",
+    "email": "fahmida@email.bd",
+    "phone": "01811223344",
+    "address": "Banani, Dhaka",
+    "store_credit": 500.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C005",
+    "name": "Tanvir Islam",
+    "email": "tanvir@email.bd",
+    "phone": "01911223344",
+    "address": "GEC Circle, Chittagong",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C006",
+    "name": "Anika Tabassum",
+    "email": "anika@email.bd",
+    "phone": "01511223344",
+    "address": "Zindabazar, Sylhet",
+    "store_credit": 1000.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C007",
+    "name": "Sajid Hasan",
+    "email": "sajid@email.bd",
+    "phone": "01611223344",
+    "address": "Rajshahi Court, Rajshahi",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C008",
+    "name": "Nusrat Jahan",
+    "email": "nusrat@email.bd",
+    "phone": "01311223344",
+    "address": "Sonadanga, Khulna",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C009",
+    "name": "Ariful Hoque",
+    "email": "arif@email.bd",
+    "phone": "01411223344",
+    "address": "Chashara, Narayanganj",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C010",
+    "name": "Sabrina Yasmin",
+    "email": "sabrina@email.bd",
+    "phone": "01799887766",
+    "address": "Uttara, Dhaka",
+    "store_credit": 150.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C011",
+    "name": "Mehedi Hasan",
+    "email": "mehedi@email.bd",
+    "phone": "01899887766",
+    "address": "Halishahar, Chittagong",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C012",
+    "name": "Tasnim Akter",
+    "email": "tasnim@email.bd",
+    "phone": "01999887766",
+    "address": "Shibganj, Sylhet",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C013",
+    "name": "Ashraful Islam",
+    "email": "ashraful@email.bd",
+    "phone": "01599887766",
+    "address": "Sathkhira, Khulna",
+    "store_credit": 200.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C014",
+    "name": "Farhana Chowdhury",
+    "email": "farhana@email.bd",
+    "phone": "01699887766",
+    "address": "Agrabad, Chittagong",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C015",
+    "name": "Mushfiqur Rahman",
+    "email": "mushfiq@email.bd",
+    "phone": "01399887766",
+    "address": "Mirpur, Dhaka",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C016",
+    "name": "Jannatul Firdous",
+    "email": "jannat@email.bd",
+    "phone": "01499887766",
+    "address": "Comilla Cantt, Comilla",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C017",
+    "name": "Mahmudul Hasan",
+    "email": "mahmud@email.bd",
+    "phone": "01722334455",
+    "address": "Barisal Sadar, Barisal",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C018",
+    "name": "Rifat Ara",
+    "email": "rifat@email.bd",
+    "phone": "01822334455",
+    "address": "Mymensingh Town, Mymensingh",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C019",
+    "name": "Niaz Morshed",
+    "email": "niaz@email.bd",
+    "phone": "01922334455",
+    "address": "Cox's Bazar Sadar, Cox's Bazar",
+    "store_credit": 0.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
+  },
+  {
+    "id": "C020",
+    "name": "Zarin Tasnim",
+    "email": "zarin@email.bd",
+    "phone": "01522334455",
+    "address": "Bogra Sadar, Bogra",
+    "store_credit": 350.0,
+    "password_hash": "$2b$12$x3uUd.O8Vc6PYAt.uHLEYOZJTlgrqKzthw5TwFgwv442pI8Nl17X2"
   }
 ]

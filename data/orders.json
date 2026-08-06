@@ -30,5 +30,696 @@
     "status": "pending_payment",
     "stripe_payment_intent_id": null,
     "created_at": "2026-07-05T12:00:00Z"
+  },
+  "ORD004": {
+    "id": "ORD004",
+    "customer_id": "C018",
+    "items": [
+      {
+        "product_id": "P032",
+        "name": "Sonic Volt Trainer",
+        "size": "7",
+        "quantity": 1,
+        "price": 3900.0
+      },
+      {
+        "product_id": "P019",
+        "name": "Tassel Loafer Classic",
+        "size": "10",
+        "quantity": 1,
+        "price": 4900.0
+      }
+    ],
+    "total": 8800.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_104",
+    "created_at": "2026-07-30T08:35:00Z"
+  },
+  "ORD005": {
+    "id": "ORD005",
+    "customer_id": "C010",
+    "items": [
+      {
+        "product_id": "P059",
+        "name": "Enchanted Block Heel",
+        "size": "8",
+        "quantity": 2,
+        "price": 4900.0
+      }
+    ],
+    "total": 9800.0,
+    "status": "cancelled",
+    "stripe_payment_intent_id": "pi_mock_105",
+    "created_at": "2026-07-11T20:57:00Z"
+  },
+  "ORD006": {
+    "id": "ORD006",
+    "customer_id": "C017",
+    "items": [
+      {
+        "product_id": "P058",
+        "name": "Chandelier Heel",
+        "size": "10",
+        "quantity": 2,
+        "price": 8400.0
+      },
+      {
+        "product_id": "P021",
+        "name": "Monarch Dress Oxford",
+        "size": "9",
+        "quantity": 1,
+        "price": 5400.0
+      }
+    ],
+    "total": 22200.0,
+    "status": "cancelled",
+    "stripe_payment_intent_id": "pi_mock_106",
+    "created_at": "2026-07-06T20:49:00Z"
+  },
+  "ORD007": {
+    "id": "ORD007",
+    "customer_id": "C019",
+    "items": [
+      {
+        "product_id": "P031",
+        "name": "HyperDrive Runner",
+        "size": "10",
+        "quantity": 1,
+        "price": 7800.0
+      },
+      {
+        "product_id": "P036",
+        "name": "Velocity Cross Trainer",
+        "size": "9",
+        "quantity": 1,
+        "price": 4100.0
+      }
+    ],
+    "total": 11900.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_107",
+    "created_at": "2026-07-13T13:57:00Z"
+  },
+  "ORD008": {
+    "id": "ORD008",
+    "customer_id": "C020",
+    "items": [
+      {
+        "product_id": "P018",
+        "name": "Summit Mountaineer Boot",
+        "size": "8",
+        "quantity": 1,
+        "price": 7200.0
+      }
+    ],
+    "total": 7200.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_108",
+    "created_at": "2026-06-20T19:13:00Z"
+  },
+  "ORD009": {
+    "id": "ORD009",
+    "customer_id": "C005",
+    "items": [
+      {
+        "product_id": "P053",
+        "name": "Regal Pearl Heel",
+        "size": "10",
+        "quantity": 2,
+        "price": 6400.0
+      },
+      {
+        "product_id": "P043",
+        "name": "Nomad Knit Sneaker",
+        "size": "7",
+        "quantity": 1,
+        "price": 3200.0
+      }
+    ],
+    "total": 16000.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_109",
+    "created_at": "2026-07-20T20:37:00Z"
+  },
+  "ORD010": {
+    "id": "ORD010",
+    "customer_id": "C003",
+    "items": [
+      {
+        "product_id": "P062",
+        "name": "Sundance Cork Sandal",
+        "size": "9",
+        "quantity": 2,
+        "price": 2300.0
+      },
+      {
+        "product_id": "P001",
+        "name": "Classic Leather Oxford",
+        "size": "10",
+        "quantity": 2,
+        "price": 4500.0
+      }
+    ],
+    "total": 13600.0,
+    "status": "pending_payment",
+    "stripe_payment_intent_id": null,
+    "created_at": "2026-06-29T15:14:00Z"
+  },
+  "ORD011": {
+    "id": "ORD011",
+    "customer_id": "C011",
+    "items": [
+      {
+        "product_id": "P063",
+        "name": "Lagoon Strap Sandal",
+        "size": "10",
+        "quantity": 2,
+        "price": 2600.0
+      },
+      {
+        "product_id": "P004",
+        "name": "TrailBlaze Hiker",
+        "size": "10",
+        "quantity": 1,
+        "price": 4200.0
+      }
+    ],
+    "total": 9400.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_111",
+    "created_at": "2026-06-17T17:34:00Z"
+  },
+  "ORD012": {
+    "id": "ORD012",
+    "customer_id": "C003",
+    "items": [
+      {
+        "product_id": "P004",
+        "name": "TrailBlaze Hiker",
+        "size": "10",
+        "quantity": 1,
+        "price": 4200.0
+      },
+      {
+        "product_id": "P011",
+        "name": "WaveBreeze Active Slide",
+        "size": "10",
+        "quantity": 1,
+        "price": 1600.0
+      }
+    ],
+    "total": 5800.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_112",
+    "created_at": "2026-07-04T14:20:00Z"
+  },
+  "ORD013": {
+    "id": "ORD013",
+    "customer_id": "C009",
+    "items": [
+      {
+        "product_id": "P042",
+        "name": "District Retro Low",
+        "size": "10",
+        "quantity": 2,
+        "price": 3700.0
+      },
+      {
+        "product_id": "P044",
+        "name": "Voyager Suede Slip-on",
+        "size": "10",
+        "quantity": 2,
+        "price": 4200.0
+      }
+    ],
+    "total": 15800.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_113",
+    "created_at": "2026-07-31T08:47:00Z"
+  },
+  "ORD014": {
+    "id": "ORD014",
+    "customer_id": "C020",
+    "items": [
+      {
+        "product_id": "P045",
+        "name": "Cruiser Daily Sneaker",
+        "size": "8",
+        "quantity": 1,
+        "price": 2900.0
+      }
+    ],
+    "total": 2900.0,
+    "status": "cancelled",
+    "stripe_payment_intent_id": "pi_mock_114",
+    "created_at": "2026-06-06T20:01:00Z"
+  },
+  "ORD015": {
+    "id": "ORD015",
+    "customer_id": "C010",
+    "items": [
+      {
+        "product_id": "P003",
+        "name": "CloudWalk Runner",
+        "size": "8",
+        "quantity": 1,
+        "price": 3200.0
+      }
+    ],
+    "total": 3200.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_115",
+    "created_at": "2026-07-31T18:07:00Z"
+  },
+  "ORD016": {
+    "id": "ORD016",
+    "customer_id": "C009",
+    "items": [
+      {
+        "product_id": "P033",
+        "name": "Altitude Hiker",
+        "size": "8",
+        "quantity": 1,
+        "price": 5600.0
+      },
+      {
+        "product_id": "P048",
+        "name": "Echo Knit Sneaker",
+        "size": "8",
+        "quantity": 2,
+        "price": 3600.0
+      }
+    ],
+    "total": 12800.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_116",
+    "created_at": "2026-06-04T12:36:00Z"
+  },
+  "ORD017": {
+    "id": "ORD017",
+    "customer_id": "C015",
+    "items": [
+      {
+        "product_id": "P026",
+        "name": "Classic Wingtip",
+        "size": "8",
+        "quantity": 1,
+        "price": 5300.0
+      },
+      {
+        "product_id": "P010",
+        "name": "Elite Chelsea Boot",
+        "size": "9",
+        "quantity": 1,
+        "price": 5800.0
+      }
+    ],
+    "total": 11100.0,
+    "status": "pending_payment",
+    "stripe_payment_intent_id": null,
+    "created_at": "2026-06-06T13:34:00Z"
+  },
+  "ORD018": {
+    "id": "ORD018",
+    "customer_id": "C016",
+    "items": [
+      {
+        "product_id": "P009",
+        "name": "Gladiator Strap Sandal",
+        "size": "9",
+        "quantity": 1,
+        "price": 2500.0
+      },
+      {
+        "product_id": "P065",
+        "name": "Tropic Leather Slide",
+        "size": "10",
+        "quantity": 2,
+        "price": 2100.0
+      }
+    ],
+    "total": 6700.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_118",
+    "created_at": "2026-07-26T13:40:00Z"
+  },
+  "ORD019": {
+    "id": "ORD019",
+    "customer_id": "C017",
+    "items": [
+      {
+        "product_id": "P056",
+        "name": "Diamond D'Orsay",
+        "size": "8",
+        "quantity": 2,
+        "price": 7200.0
+      }
+    ],
+    "total": 14400.0,
+    "status": "pending_payment",
+    "stripe_payment_intent_id": null,
+    "created_at": "2026-08-01T15:27:00Z"
+  },
+  "ORD020": {
+    "id": "ORD020",
+    "customer_id": "C011",
+    "items": [
+      {
+        "product_id": "P032",
+        "name": "Sonic Volt Trainer",
+        "size": "9",
+        "quantity": 2,
+        "price": 3900.0
+      },
+      {
+        "product_id": "P012",
+        "name": "Brogue Heritage Boot",
+        "size": "8",
+        "quantity": 2,
+        "price": 6400.0
+      }
+    ],
+    "total": 20600.0,
+    "status": "pending_payment",
+    "stripe_payment_intent_id": null,
+    "created_at": "2026-07-19T13:01:00Z"
+  },
+  "ORD021": {
+    "id": "ORD021",
+    "customer_id": "C018",
+    "items": [
+      {
+        "product_id": "P024",
+        "name": "Sovereign Derby",
+        "size": "8",
+        "quantity": 2,
+        "price": 4700.0
+      },
+      {
+        "product_id": "P063",
+        "name": "Lagoon Strap Sandal",
+        "size": "9",
+        "quantity": 2,
+        "price": 2600.0
+      }
+    ],
+    "total": 14600.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_121",
+    "created_at": "2026-07-06T16:00:00Z"
+  },
+  "ORD022": {
+    "id": "ORD022",
+    "customer_id": "C019",
+    "items": [
+      {
+        "product_id": "P011",
+        "name": "WaveBreeze Active Slide",
+        "size": "8",
+        "quantity": 2,
+        "price": 1600.0
+      }
+    ],
+    "total": 3200.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_122",
+    "created_at": "2026-07-01T19:30:00Z"
+  },
+  "ORD023": {
+    "id": "ORD023",
+    "customer_id": "C018",
+    "items": [
+      {
+        "product_id": "P003",
+        "name": "CloudWalk Runner",
+        "size": "9",
+        "quantity": 1,
+        "price": 3200.0
+      },
+      {
+        "product_id": "P012",
+        "name": "Brogue Heritage Boot",
+        "size": "10",
+        "quantity": 1,
+        "price": 6400.0
+      }
+    ],
+    "total": 9600.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_123",
+    "created_at": "2026-07-18T15:35:00Z"
+  },
+  "ORD024": {
+    "id": "ORD024",
+    "customer_id": "C019",
+    "items": [
+      {
+        "product_id": "P055",
+        "name": "Royal Satin Pump",
+        "size": "9",
+        "quantity": 2,
+        "price": 5200.0
+      },
+      {
+        "product_id": "P043",
+        "name": "Nomad Knit Sneaker",
+        "size": "9",
+        "quantity": 2,
+        "price": 3200.0
+      }
+    ],
+    "total": 16800.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_124",
+    "created_at": "2026-06-30T09:46:00Z"
+  },
+  "ORD025": {
+    "id": "ORD025",
+    "customer_id": "C009",
+    "items": [
+      {
+        "product_id": "P016",
+        "name": "Bridal Satin Heels",
+        "size": "8",
+        "quantity": 1,
+        "price": 6800.0
+      },
+      {
+        "product_id": "P069",
+        "name": "Marina Sport Slide",
+        "size": "8",
+        "quantity": 2,
+        "price": 1850.0
+      }
+    ],
+    "total": 10500.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_125",
+    "created_at": "2026-07-07T09:53:00Z"
+  },
+  "ORD026": {
+    "id": "ORD026",
+    "customer_id": "C009",
+    "items": [
+      {
+        "product_id": "P030",
+        "name": "Executive Derby",
+        "size": "8",
+        "quantity": 2,
+        "price": 4300.0
+      },
+      {
+        "product_id": "P047",
+        "name": "Aero Canvas Low",
+        "size": "7",
+        "quantity": 1,
+        "price": 2100.0
+      }
+    ],
+    "total": 10700.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_126",
+    "created_at": "2026-06-06T08:35:00Z"
+  },
+  "ORD027": {
+    "id": "ORD027",
+    "customer_id": "C012",
+    "items": [
+      {
+        "product_id": "P063",
+        "name": "Lagoon Strap Sandal",
+        "size": "7",
+        "quantity": 1,
+        "price": 2600.0
+      }
+    ],
+    "total": 2600.0,
+    "status": "pending_payment",
+    "stripe_payment_intent_id": null,
+    "created_at": "2026-07-07T15:30:00Z"
+  },
+  "ORD028": {
+    "id": "ORD028",
+    "customer_id": "C017",
+    "items": [
+      {
+        "product_id": "P024",
+        "name": "Sovereign Derby",
+        "size": "9",
+        "quantity": 2,
+        "price": 4700.0
+      },
+      {
+        "product_id": "P007",
+        "name": "Sunset Leather Sandal",
+        "size": "7",
+        "quantity": 1,
+        "price": 2200.0
+      }
+    ],
+    "total": 11600.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_128",
+    "created_at": "2026-08-02T09:36:00Z"
+  },
+  "ORD029": {
+    "id": "ORD029",
+    "customer_id": "C004",
+    "items": [
+      {
+        "product_id": "P020",
+        "name": "Capri Cork Slide",
+        "size": "9",
+        "quantity": 1,
+        "price": 1800.0
+      }
+    ],
+    "total": 1800.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_129",
+    "created_at": "2026-06-16T16:48:00Z"
+  },
+  "ORD030": {
+    "id": "ORD030",
+    "customer_id": "C016",
+    "items": [
+      {
+        "product_id": "P067",
+        "name": "Sol Leather Sandal",
+        "size": "10",
+        "quantity": 2,
+        "price": 2400.0
+      }
+    ],
+    "total": 4800.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_130",
+    "created_at": "2026-07-09T17:27:00Z"
+  },
+  "ORD031": {
+    "id": "ORD031",
+    "customer_id": "C012",
+    "items": [
+      {
+        "product_id": "P013",
+        "name": "Retro Street High-Top",
+        "size": "8",
+        "quantity": 1,
+        "price": 3400.0
+      }
+    ],
+    "total": 3400.0,
+    "status": "completed",
+    "stripe_payment_intent_id": "pi_mock_131",
+    "created_at": "2026-06-11T10:15:00Z"
+  },
+  "ORD032": {
+    "id": "ORD032",
+    "customer_id": "C008",
+    "items": [
+      {
+        "product_id": "P021",
+        "name": "Monarch Dress Oxford",
+        "size": "7",
+        "quantity": 2,
+        "price": 5400.0
+      }
+    ],
+    "total": 10800.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_132",
+    "created_at": "2026-07-31T12:02:00Z"
+  },
+  "ORD033": {
+    "id": "ORD033",
+    "customer_id": "C010",
+    "items": [
+      {
+        "product_id": "P037",
+        "name": "Vortex Active Shoe",
+        "size": "7",
+        "quantity": 1,
+        "price": 3500.0
+      },
+      {
+        "product_id": "P059",
+        "name": "Enchanted Block Heel",
+        "size": "9",
+        "quantity": 1,
+        "price": 4900.0
+      }
+    ],
+    "total": 8400.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_133",
+    "created_at": "2026-06-15T16:14:00Z"
+  },
+  "ORD034": {
+    "id": "ORD034",
+    "customer_id": "C007",
+    "items": [
+      {
+        "product_id": "P019",
+        "name": "Tassel Loafer Classic",
+        "size": "7",
+        "quantity": 1,
+        "price": 4900.0
+      },
+      {
+        "product_id": "P010",
+        "name": "Elite Chelsea Boot",
+        "size": "9",
+        "quantity": 2,
+        "price": 5800.0
+      }
+    ],
+    "total": 16500.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_134",
+    "created_at": "2026-06-16T15:44:00Z"
+  },
+  "ORD035": {
+    "id": "ORD035",
+    "customer_id": "C012",
+    "items": [
+      {
+        "product_id": "P035",
+        "name": "Titan Trail Boot",
+        "size": "10",
+        "quantity": 2,
+        "price": 6100.0
+      },
+      {
+        "product_id": "P065",
+        "name": "Tropic Leather Slide",
+        "size": "7",
+        "quantity": 1,
+        "price": 2100.0
+      }
+    ],
+    "total": 14300.0,
+    "status": "paid",
+    "stripe_payment_intent_id": "pi_mock_135",
+    "created_at": "2026-07-12T17:16:00Z"
   }
 }

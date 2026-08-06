@@ -2,29 +2,198 @@ import os
 import json
 import datetime
 import stripe
+import re
 import logging
 from typing import Optional
 from langchain_core.tools import tool
+from langchain_core.runnables import RunnableConfig
 from adapters import get_adapter
 from adapters.base import AdapterError
+import pybreaker
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from sqlalchemy.exc import OperationalError, DBAPIError, TimeoutError as SATimeoutError
 
 # Configure logger
 logger = logging.getLogger("vendra.tools")
 
-# Active adapter instance
-adapter = get_adapter()
+def validate_product_id(product_id: str) -> bool:
+    if not product_id:
+        return False
+    return bool(re.match(r"^[a-zA-Z0-9\s-]+$", str(product_id).strip()))
 
-# Global in-memory shopping carts with activity tracking
-CARTS = {}
+def validate_order_id(order_id: str) -> bool:
+    if not order_id:
+        return False
+    return bool(re.match(r"^[a-zA-Z0-9\s-]+$", str(order_id).strip()))
+
+def validate_shoe_size(size: str) -> bool:
+    if not size:
+        return False
+    return bool(re.match(r"^[a-zA-Z0-9\s.-]+$", str(size).strip()))
+
+# Circuit Breakers
+llm_breaker = pybreaker.CircuitBreaker(fail_max=3, reset_timeout=15)
+stripe_breaker = pybreaker.CircuitBreaker(fail_max=3, reset_timeout=30)
+db_breaker = pybreaker.CircuitBreaker(fail_max=5, reset_timeout=30)
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=1, max=5),
+    retry=retry_if_exception_type((OperationalError, DBAPIError, SATimeoutError)),
+    reraise=True
+)
+def _call_adapter_func(func, *args, **kwargs):
+    return func(*args, **kwargs)
+
+def safe_db_call(func, *args, **kwargs):
+    try:
+        return db_breaker.call(_call_adapter_func, func, *args, **kwargs)
+    except pybreaker.CircuitBreakerError as e:
+        logger.error("Database Circuit Breaker is OPEN.")
+        raise AdapterError("Database service is temporarily unavailable due to high load or maintenance.") from e
+
+class CircuitBreakerAdapterProxy:
+    def __init__(self, target):
+        super().__setattr__("_target", target)
+
+    def __getattr__(self, name):
+        if name == "_target":
+            return super().__getattribute__("_target")
+        attr = getattr(self._target, name)
+        if callable(attr):
+            def wrapper(*args, **kwargs):
+                try:
+                    return db_breaker.call(_call_adapter_func, attr, *args, **kwargs)
+                except pybreaker.CircuitBreakerError as e:
+                    logger.error(f"Database Circuit Breaker is OPEN during {name}().")
+                    raise AdapterError("Database service is temporarily unavailable due to high load or maintenance.") from e
+            return wrapper
+        return attr
+
+    def __setattr__(self, name, value):
+        if name == "_target":
+            super().__setattr__(name, value)
+        else:
+            setattr(self._target, name, value)
+
+    def __delattr__(self, name):
+        if name == "_target":
+            super().__delattr__(name)
+        else:
+            delattr(self._target, name)
+
+# Active adapter instance wrapped in circuit breaker proxy
+adapter_instance = get_adapter()
+adapter = CircuitBreakerAdapterProxy(adapter_instance)
+
+# Redis-backed Stateless Cart Store and Caching Proxy with memory fallback
+class RedisCartProxy:
+    def __init__(self):
+        self._local_carts = {}
+        self._local_activity = {}
+        self.redis_url = os.getenv("REDIS_URL")
+        self.redis_client = None
+        self._connect_redis()
+
+    def _connect_redis(self):
+        if self.redis_url:
+            try:
+                import redis
+                # Use connection pooling with timeout to prevent blocking startup
+                pool = redis.ConnectionPool.from_url(self.redis_url, socket_timeout=2.0, decode_responses=True)
+                self.redis_client = redis.Redis(connection_pool=pool)
+                self.redis_client.ping()
+                logger.info("Stateless Redis Cart Store connected successfully.")
+            except Exception as e:
+                logger.warning(f"Failed to connect to Redis server ({e}). Operating in memory-only fallback mode.")
+                self.redis_client = None
+
+    def _get_key(self, cart_id: str) -> str:
+        return f"vendra:cart:{cart_id}"
+
+    def get(self, key: str, default=None):
+        if self.redis_client:
+            try:
+                val = self.redis_client.get(self._get_key(key))
+                if val:
+                    return json.loads(val)
+                return default
+            except Exception as e:
+                logger.error(f"Redis get failed: {e}")
+        return self._local_carts.get(key, default)
+
+    def __getitem__(self, key: str):
+        if self.redis_client:
+            try:
+                val = self.redis_client.get(self._get_key(key))
+                if val:
+                    return json.loads(val)
+                raise KeyError(key)
+            except Exception as e:
+                logger.error(f"Redis getitem failed: {e}")
+        return self._local_carts[key]
+
+    def __setitem__(self, key: str, value):
+        if self.redis_client:
+            try:
+                # Set with 24 hours TTL (86400 seconds)
+                self.redis_client.set(self._get_key(key), json.dumps(value), ex=86400)
+                return
+            except Exception as e:
+                logger.error(f"Redis setitem failed: {e}")
+        self._local_carts[key] = value
+
+    def __contains__(self, key: str) -> bool:
+        if self.redis_client:
+            try:
+                return bool(self.redis_client.exists(self._get_key(key)))
+            except Exception as e:
+                logger.error(f"Redis contains failed: {e}")
+        return key in self._local_carts
+
+    def pop(self, key: str, default=None):
+        if self.redis_client:
+            try:
+                val = self.get(key, default)
+                self.redis_client.delete(self._get_key(key))
+                return val
+            except Exception as e:
+                logger.error(f"Redis pop failed: {e}")
+        return self._local_carts.pop(key, default)
+
+    def keys(self):
+        if self.redis_client:
+            try:
+                keys = self.redis_client.keys("vendra:cart:*")
+                return [k.replace("vendra:cart:", "") for k in keys]
+            except Exception as e:
+                logger.error(f"Redis keys failed: {e}")
+        return self._local_carts.keys()
+
+    def clear(self):
+        if self.redis_client:
+            try:
+                keys = self.redis_client.keys("vendra:cart:*")
+                if keys:
+                    self.redis_client.delete(*keys)
+                return
+            except Exception as e:
+                logger.error(f"Redis clear failed: {e}")
+        self._local_carts.clear()
+
+CARTS = RedisCartProxy()
 CART_LAST_ACTIVITY = {}
 
 def update_cart_activity(cart_id: str) -> None:
-    CART_LAST_ACTIVITY[cart_id] = datetime.datetime.now(datetime.timezone.utc)
+    if not CARTS.redis_client:
+        CART_LAST_ACTIVITY[cart_id] = datetime.datetime.now(datetime.timezone.utc)
 
 def prune_inactive_carts(hours: float = 24.0) -> None:
     """
     Remove carts that have been inactive for more than N hours.
     """
+    if CARTS.redis_client:
+        return # Handled by Redis TTL natively
     now = datetime.datetime.now(datetime.timezone.utc)
     inactive_threshold = datetime.timedelta(hours=hours)
     for cid in list(CARTS.keys()):
@@ -35,6 +204,33 @@ def prune_inactive_carts(hours: float = 24.0) -> None:
                 CART_LAST_ACTIVITY.pop(cid, None)
         else:
             CART_LAST_ACTIVITY[cid] = now
+
+# Caching Helpers with no-op fallback
+def get_cached_catalog_value(key: str) -> Optional[str]:
+    if CARTS.redis_client:
+        try:
+            return CARTS.redis_client.get(f"vendra:catalog:{key}")
+        except Exception as e:
+            logger.error(f"Redis catalog cache get failed: {e}")
+    return None
+
+def set_cached_catalog_value(key: str, value: str, ttl: int = 300) -> None:
+    if CARTS.redis_client:
+        try:
+            CARTS.redis_client.set(f"vendra:catalog:{key}", value, ex=ttl)
+        except Exception as e:
+            logger.error(f"Redis catalog cache set failed: {e}")
+
+def invalidate_catalog_cache(product_id: str = None) -> None:
+    if CARTS.redis_client:
+        try:
+            if product_id:
+                CARTS.redis_client.delete(f"vendra:catalog:product:{product_id}")
+            keys = CARTS.redis_client.keys("vendra:catalog:search:*")
+            if keys:
+                CARTS.redis_client.delete(*keys)
+        except Exception as e:
+            logger.error(f"Redis cache invalidation failed: {e}")
 
 @tool
 def search_products(
@@ -58,6 +254,13 @@ def search_products(
         size: Optional shoe size filter (e.g., '5', '6', '7', '8', '9', '10', '11').
     """
     try:
+        import hashlib
+        param_str = f"search:{query}:{top_k}:{category}:{max_price}:{min_price}:{size}"
+        cache_key = f"search:{hashlib.md5(param_str.encode('utf-8')).hexdigest()}"
+        cached = get_cached_catalog_value(cache_key)
+        if cached:
+            return cached
+
         # Retrieve more candidates initially in case we filter some out due to size stock constraint
         retrieval_k = top_k * 2 if size else top_k
         results = search_products_text(
@@ -110,11 +313,13 @@ def search_products(
             matching_count += 1
             
         if matching_count == 0:
-            if size:
-                return f"No matching shoes found in size {size}."
-            return "No matching shoes found in catalog."
+            ret_val = f"No matching shoes found in size {size}." if size else "No matching shoes found in catalog."
+            set_cached_catalog_value(cache_key, ret_val, ttl=300)
+            return ret_val
             
-        return "\n".join(output)
+        ret_val = "\n".join(output)
+        set_cached_catalog_value(cache_key, ret_val, ttl=300)
+        return ret_val
     except AdapterError as e:
         logger.error(f"Adapter error in search_products: {e}", exc_info=True)
         return "Error: Vendra's external integration service is temporarily unavailable. Please try again later."
@@ -224,6 +429,8 @@ def check_stock(product_id: str, size: str) -> str:
     """
     p_id = str(product_id).strip()
     sz_str = str(size).strip()
+    if not validate_product_id(p_id) or not validate_shoe_size(sz_str):
+        return "Error: Invalid product_id or size format."
     try:
         details = adapter.get_product_details(p_id)
         if not details:
@@ -251,20 +458,31 @@ def get_product_details(product_id: str) -> str:
         product_id: The unique ID of the product.
     """
     p_id = str(product_id).strip()
-    try:
-        details = adapter.get_product_details(p_id)
-        if not details:
-            # Fuzzy resolution check: match name/SKU keywords to existing product IDs
-            normalized_query = p_id.lower().replace("-", " ").replace("_", " ")
-            query_terms = [t for t in normalized_query.split() if t not in ["sku", "id", "product", "find"]]
-            if query_terms:
+    if not validate_product_id(p_id):
+        normalized_query = p_id.lower().replace("-", " ").replace("_", " ")
+        query_terms = [t for t in normalized_query.split() if t not in ["sku", "id", "product", "find"]]
+        found_id = None
+        if query_terms:
+            try:
                 for p in adapter.get_products():
                     p_name_lower = p.get("name", "").lower()
                     if all(term in p_name_lower for term in query_terms):
-                        p_id = p["id"]
-                        details = adapter.get_product_details(p_id)
+                        found_id = p["id"]
                         break
-                        
+            except Exception:
+                pass
+        if found_id:
+            p_id = found_id
+        else:
+            return "Error: Invalid Product ID format. Expected format like P001."
+            
+    cache_key = f"product:{p_id}"
+    cached = get_cached_catalog_value(cache_key)
+    if cached:
+        return cached
+
+    try:
+        details = adapter.get_product_details(p_id)
         if not details:
             return f"Product ID '{product_id}' not found."
             
@@ -272,7 +490,7 @@ def get_product_details(product_id: str) -> str:
             f"- Size {v['size']}: {v['stock']} units in stock" for v in details.get("variants", [])
         )
         
-        return (
+        ret_val = (
             f"Product Details:\n"
             f"Name: {details['name']}\n"
             f"ID: {p_id}\n"
@@ -281,6 +499,8 @@ def get_product_details(product_id: str) -> str:
             f"Description: {details['description']}\n"
             f"\nAvailable Stock by Size:\n{variants_str}"
         )
+        set_cached_catalog_value(cache_key, ret_val, ttl=300)
+        return ret_val
     except AdapterError as e:
         logger.error(f"Adapter error in get_product_details: {e}", exc_info=True)
         return "Error: Vendra's external integration service is temporarily unavailable. Please try again later."
@@ -304,6 +524,15 @@ def add_to_cart(cart_id: str, product_id: str, size: str, customer_id: str, quan
     pid = str(product_id).strip()
     sz = str(size).strip()
     cust_id = str(customer_id).strip()
+    
+    if not validate_product_id(pid) or not validate_shoe_size(sz):
+        return "Error: Invalid product_id or size format."
+    
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cust_id = verified_cust_id
+        cid = f"cart_{verified_cust_id}"
     
     if cid != f"cart_{cust_id}":
         return "Refused: Access denied. You do not own this cart."
@@ -364,6 +593,12 @@ def view_cart(cart_id: str, customer_id: str) -> str:
     cid = str(cart_id).strip()
     cust_id = str(customer_id).strip()
     
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cust_id = verified_cust_id
+        cid = f"cart_{verified_cust_id}"
+    
     if cid != f"cart_{cust_id}":
         return "Refused: Access denied. You do not own this cart."
         
@@ -415,6 +650,15 @@ def remove_from_cart(cart_id: str, product_id: str, customer_id: str) -> str:
     pid = str(product_id).strip()
     cust_id = str(customer_id).strip()
     
+    if not validate_product_id(pid):
+        return "Error: Invalid product_id format."
+    
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cust_id = verified_cust_id
+        cid = f"cart_{verified_cust_id}"
+    
     if cid != f"cart_{cust_id}":
         return "Refused: Access denied. You do not own this cart."
         
@@ -454,6 +698,12 @@ def create_order(customer_id: str, cart_id: str) -> str:
     cid = str(cart_id).strip()
     cust_id = str(customer_id).strip()
     
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cust_id = verified_cust_id
+        cid = f"cart_{verified_cust_id}"
+    
     if cid != f"cart_{cust_id}":
         return "Refused: Access denied. You do not own this cart."
         
@@ -465,6 +715,9 @@ def create_order(customer_id: str, cart_id: str) -> str:
         new_order = adapter.create_order(cust_id, cart_items)
         CARTS[cid] = []
         update_cart_activity(cid)
+        # Invalidate catalog cache for all ordered items to refresh stock displays
+        for item in cart_items:
+            invalidate_catalog_cache(item["product_id"])
         return (
             f"Order #{new_order['id']} has been created successfully.\n"
             f"Total: {new_order['total']} BDT\n"
@@ -489,6 +742,14 @@ def create_payment_link(order_id: str, customer_id: str) -> str:
     """
     oid = str(order_id).strip()
     cid = str(customer_id).strip()
+    
+    if not validate_order_id(oid):
+        return "Error: Invalid order_id format."
+        
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cid = verified_cust_id
     try:
         order = adapter.get_order(oid)
         if not order:
@@ -506,23 +767,29 @@ def create_payment_link(order_id: str, customer_id: str) -> str:
             return f"Payment Link: {mock_url} (Stripe keys not set, mock mode)"
             
         stripe.api_key = stripe_key
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[{
-                "price_data": {
-                    "currency": "bdt",
-                    "product_data": {
-                        "name": f"Vendra Order #{oid}",
-                    },
-                    "unit_amount": int(order["total"] * 100),
-                },
-                "quantity": 1,
-            }],
-            mode="payment",
-            success_url=f"http://localhost:8501/?payment_success=true&order_id={oid}",
-            cancel_url="http://localhost:8501/?payment_cancelled=true",
-            metadata={"order_id": oid}
-        )
+        try:
+            session = stripe_breaker.call(
+                lambda: stripe.checkout.Session.create(
+                    payment_method_types=["card"],
+                    line_items=[{
+                        "price_data": {
+                            "currency": "bdt",
+                            "product_data": {
+                                "name": f"Vendra Order #{oid}",
+                            },
+                            "unit_amount": int(order["total"] * 100),
+                        },
+                        "quantity": 1,
+                    }],
+                    mode="payment",
+                    success_url=f"http://localhost:8501/?payment_success=true&order_id={oid}",
+                    cancel_url="http://localhost:8501/?payment_cancelled=true",
+                    metadata={"order_id": oid}
+                )
+            )
+        except pybreaker.CircuitBreakerError:
+            logger.error("Stripe Circuit Breaker is OPEN.")
+            return "Error: The payment gateway is temporarily offline. Please try again in a few moments."
         
         adapter.set_payment_intent(oid, session.id)
         return f"Payment Link: {session.url}"
@@ -559,6 +826,14 @@ def track_order(order_id: str, customer_id: str) -> str:
     oid = str(order_id).strip()
     cid = str(customer_id).strip()
     
+    if not validate_order_id(oid):
+        return "Error: Invalid order_id format."
+        
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cid = verified_cust_id
+    
     try:
         tracking_info = adapter.track_order(oid, cid)
         if "error" in tracking_info:
@@ -584,6 +859,49 @@ def track_order(order_id: str, customer_id: str) -> str:
         return f"Error tracking order: {str(e)}"
 
 @tool
+def get_order_status(order_id: str, customer_id: str) -> str:
+    """
+    Retrieve details of a specific order (status, items, total, date) for the customer.
+    Checks order ownership first.
+    
+    Args:
+        order_id: Unique order ID (e.g. ORD123).
+        customer_id: Customer ID requesting the details (for privacy verification).
+    """
+    oid = str(order_id).strip()
+    cid = str(customer_id).strip()
+    
+    if not validate_order_id(oid):
+        return "Error: Invalid order_id format."
+        
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cid = verified_cust_id
+    try:
+        order = adapter.get_order(oid)
+        if not order:
+            return f"Error: Order #{oid} not found."
+            
+        if order.get("customer_id") != cid:
+            return "Refused: Access denied. You do not own this order."
+            
+        items_str = ", ".join(f"{item['quantity']}x product {item['product_id']} (size {item['size']})" for item in order.get("items", []))
+        return (
+            f"Order Details (ID: {oid}):\n"
+            f"Date: {order.get('created_at')}\n"
+            f"Status: {order.get('status').upper()}\n"
+            f"Items: [{items_str}]\n"
+            f"Total: {order.get('total'):.2f} BDT"
+        )
+    except AdapterError as e:
+        logger.error(f"Adapter error in get_order_status: {e}", exc_info=True)
+        return "Error: Vendra's external integration service is temporarily unavailable. Please try again later."
+    except Exception as e:
+        logger.error(f"Error fetching order status: {e}", exc_info=True)
+        return f"Error fetching order status: {str(e)}"
+
+@tool
 def check_cancellation_eligibility(order_id: str, customer_id: str) -> str:
     """
     Deterministic evaluation of order cancellation eligibility based on store policy.
@@ -604,6 +922,19 @@ def check_cancellation_eligibility(order_id: str, customer_id: str) -> str:
     """
     oid = str(order_id).strip()
     cid = str(customer_id).strip()
+    
+    if not validate_order_id(oid):
+        return json.dumps({
+            "eligible": False,
+            "reason": "Error: Invalid order_id format.",
+            "refund_type": "none",
+            "order_id": oid
+        })
+        
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cid = verified_cust_id
     try:
         order = adapter.get_order(oid)
         if not order:
@@ -702,10 +1033,10 @@ def check_cancellation_eligibility(order_id: str, customer_id: str) -> str:
         })
 
 @tool
-def cancel_order(order_id: str, customer_id: str) -> str:
+def cancel_order(order_id: str, customer_id: str, config: RunnableConfig = None) -> str:
     """
-    Cancel a paid order and release inventory stock. Triggers credit card refund or issues store credit.
-    Checks customer ownership verification before executing the cancellation.
+    Submit a refund or cancellation request for admin approval.
+    Checks customer ownership verification and cancellation eligibility before submitting.
     
     Args:
         order_id: Unique order ID to cancel.
@@ -713,6 +1044,14 @@ def cancel_order(order_id: str, customer_id: str) -> str:
     """
     oid = str(order_id).strip()
     cid = str(customer_id).strip()
+    
+    if not validate_order_id(oid):
+        return "Error: Invalid order_id format."
+        
+    from agent.logging_config import ctx_customer_id
+    verified_cust_id = ctx_customer_id.get()
+    if verified_cust_id != "N/A":
+        cid = verified_cust_id
     try:
         elig_res_json = check_cancellation_eligibility.invoke({"order_id": oid, "customer_id": cid})
         eligibility = json.loads(elig_res_json)
@@ -725,55 +1064,34 @@ def cancel_order(order_id: str, customer_id: str) -> str:
         if not order:
             return f"Error: Order #{oid} not found."
             
-        success = adapter.cancel_order(oid)
-        if not success:
-            return f"Error: Failed to process cancellation via adapter for Order #{oid}."
+        # Get thread_id from run config
+        thread_id = "default_thread"
+        if config:
+            configurable = config.get("configurable", {})
+            thread_id = configurable.get("thread_id", "default_thread")
             
-        if refund_type == "full_refund":
-            stripe_key = os.getenv("STRIPE_SECRET_KEY")
-            pi_id = order.get("stripe_payment_intent_id")
-            
-            if pi_id and stripe_key and not stripe_key.startswith("sk_test_your_"):
-                try:
-                    stripe.api_key = stripe_key
-                    if pi_id.startswith("cs_"):
-                        session = stripe.checkout.Session.retrieve(pi_id)
-                        payment_intent = session.payment_intent
-                    else:
-                        payment_intent = pi_id
-                        
-                    if payment_intent:
-                        stripe.Refund.create(payment_intent=payment_intent)
-                        refund_details = "A full refund has been credited back to your Stripe card."
-                    else:
-                        refund_details = "Stripe Session found, but Payment Intent is missing. Manual bank transfer required."
-                except Exception as e:
-                    logger.error(f"Stripe refund failed: {e}", exc_info=True)
-                    refund_details = f"Stripe refund call failed: {str(e)}. Manual processing required."
-            else:
-                refund_details = "Mock Refund Processed. A full refund of original payment amount has been released to card."
-                
-            adapter.mark_refunded(oid)
-            return f"Cancellation Approved for Order #{oid}. Status: REFUNDED. Inventory stock restored. {refund_details}"
-            
-        elif refund_type == "store_credit":
-            # Issue store credit via locked adapter method
-            adapter.issue_store_credit(order["customer_id"], order["total"])
-            new_balance = adapter.get_store_credit(order["customer_id"])
-            order["status"] = "cancelled"
-            return (
-                f"Cancellation Approved for Order #{oid}. Status: CANCELLED (Store Credit Issued). "
-                f"Inventory stock restored. Store credit of {order['total']} BDT has been added to Customer ID {order['customer_id']}. "
-                f"Current Store Credit Balance: {new_balance} BDT."
-            )
-            
-        return f"Unknown refund state: {refund_type}"
+        # Create refund request record in DB
+        eligibility_reason = eligibility.get("reason", "Eligible for refund")
+        req = adapter.create_refund_request(
+            order_id=oid,
+            customer_id=cid,
+            refund_type=refund_type,
+            eligibility_reason=eligibility_reason,
+            thread_id=thread_id
+        )
+        
+        return (
+            f"Your request to cancel Order #{oid} (Refund Type: {refund_type.upper()}) "
+            f"has been submitted for review. Request ID: {req['id']}. "
+            f"You will be notified once our admin team approves or denies your request. "
+            f"Please note that the refund will not be processed automatically until approved."
+        )
     except AdapterError as e:
         logger.error(f"Adapter error in cancel_order: {e}", exc_info=True)
         return "Error: Vendra's external integration service is temporarily unavailable. Please try again later."
     except Exception as e:
-        logger.error(f"Error during cancellation: {e}", exc_info=True)
-        return f"Error during cancellation: {str(e)}"
+        logger.error(f"Error submitting cancellation request: {e}", exc_info=True)
+        return f"Error submitting cancellation: {str(e)}"
 
 @tool
 def retrieve_policy_text(query: str) -> str:

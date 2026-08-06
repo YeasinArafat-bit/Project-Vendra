@@ -59,6 +59,7 @@ class JSONAdapter(BaseAdapter):
             # Load promotions
             with open(os.path.join(DATA_DIR, "promotions.json"), "r", encoding="utf-8") as f:
                 self.promotions = json.load(f)
+            self.refund_requests = {}
 
     def _atomic_save(self, filename: str, data: dict | list) -> None:
         """
@@ -387,3 +388,41 @@ class JSONAdapter(BaseAdapter):
             
             if mutated:
                 self._save_state_locked()
+
+    def create_refund_request(self, order_id: str, customer_id: str, refund_type: str, eligibility_reason: str, thread_id: str) -> dict:
+        with self.lock:
+            req_id = f"REF{str(uuid.uuid4())[:8].upper()}"
+            req = {
+                "id": req_id,
+                "order_id": order_id,
+                "customer_id": customer_id,
+                "requested_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "refund_type": refund_type,
+                "eligibility_reason": eligibility_reason,
+                "status": "pending_review",
+                "reviewed_by": None,
+                "reviewed_at": None,
+                "review_notes": None,
+                "thread_id": thread_id
+            }
+            self.refund_requests[req_id] = req
+            return req
+
+    def get_refund_request(self, request_id: str) -> dict:
+        with self.lock:
+            return self.refund_requests.get(request_id, {})
+
+    def get_pending_refund_requests(self) -> list:
+        with self.lock:
+            return [req for req in self.refund_requests.values() if req["status"] == "pending_review"]
+
+    def update_refund_request(self, request_id: str, status: str, reviewed_by: str, review_notes: str) -> bool:
+        with self.lock:
+            if request_id not in self.refund_requests:
+                return False
+            req = self.refund_requests[request_id]
+            req["status"] = status
+            req["reviewed_by"] = reviewed_by
+            req["reviewed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            req["review_notes"] = review_notes
+            return True

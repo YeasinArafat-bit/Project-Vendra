@@ -97,3 +97,31 @@ class BaseAdapter(ABC):
         (thread-safe, persisted where applicable).
         """
         pass
+
+    @abstractmethod
+    def create_refund_request(self, order_id: str, customer_id: str, refund_type: str, eligibility_reason: str, thread_id: str) -> dict:
+        """
+        Create a new refund request record in pending review status.
+        """
+        pass
+
+    @abstractmethod
+    def get_refund_request(self, request_id: str) -> dict:
+        """
+        Retrieve a specific refund request by ID.
+        """
+        pass
+
+    @abstractmethod
+    def get_pending_refund_requests(self) -> list:
+        """
+        Retrieve all refund requests with status 'pending_review'.
+        """
+        pass
+
+    @abstractmethod
+    def update_refund_request(self, request_id: str, status: str, reviewed_by: str, review_notes: str) -> bool:
+        """
+        Update the status, reviewer, and notes of a refund request.
+        """
+        pass

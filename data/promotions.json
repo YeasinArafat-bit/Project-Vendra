@@ -4,7 +4,9 @@
     "title": "Wedding Season Sale",
     "description": "Get a special 15% discount on all elegant wedding and dress footwear.",
     "discount_percent": 15,
-    "applies_to_categories": ["wedding"],
+    "applies_to_categories": [
+      "wedding"
+    ],
     "code": "WEDDING15",
     "valid_until": "2026-09-30T23:59:59Z"
   },
@@ -13,7 +15,9 @@
     "title": "Sport Flash Deal",
     "description": "Unlock 10% off high-performance running and training shoes.",
     "discount_percent": 10,
-    "applies_to_categories": ["sport"],
+    "applies_to_categories": [
+      "sport"
+    ],
     "code": "SPORT10",
     "valid_until": "2026-08-31T23:59:59Z"
   },
@@ -22,8 +26,64 @@
     "title": "Free Delivery Offer",
     "description": "Free premium delivery nationwide for any orders exceeding 5000 BDT.",
     "discount_percent": 0,
-    "applies_to_categories": ["wedding", "formal", "casual", "sport", "party"],
+    "applies_to_categories": [
+      "wedding",
+      "formal",
+      "casual",
+      "sport",
+      "party"
+    ],
     "code": "FREESHIP5K",
+    "valid_until": "2026-12-31T23:59:59Z"
+  },
+  {
+    "id": "PROM004",
+    "title": "Monsoon Clearance",
+    "description": "Get an extra 20% discount on casual shoes and summer sandals to beat the monsoon.",
+    "discount_percent": 20,
+    "applies_to_categories": [
+      "casual",
+      "sandals"
+    ],
+    "code": "MONSOON20",
+    "valid_until": "2026-06-30T23:59:59Z"
+  },
+  {
+    "id": "PROM005",
+    "title": "Eid Special Discount",
+    "description": "Eid shopping festival! Get 25% off wedding and formal shoes.",
+    "discount_percent": 25,
+    "applies_to_categories": [
+      "wedding",
+      "formal"
+    ],
+    "code": "EID25",
+    "valid_until": "2026-04-15T23:59:59Z"
+  },
+  {
+    "id": "PROM006",
+    "title": "Casual Weekend Sale",
+    "description": "Enjoy 12% off on all casual comfort sneakers and slides.",
+    "discount_percent": 12,
+    "applies_to_categories": [
+      "casual"
+    ],
+    "code": "CASUAL12",
+    "valid_until": "2026-08-31T23:59:59Z"
+  },
+  {
+    "id": "PROM007",
+    "title": "Welcome Discount",
+    "description": "New customer discount! Save 5% on your first order across all shoe categories.",
+    "discount_percent": 5,
+    "applies_to_categories": [
+      "wedding",
+      "formal",
+      "casual",
+      "sport",
+      "sandals"
+    ],
+    "code": "WELCOME5",
     "valid_until": "2026-12-31T23:59:59Z"
   }
 ]

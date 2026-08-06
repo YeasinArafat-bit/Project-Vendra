@@ -17,8 +17,10 @@ ENV/
 .env
 
 # Local Databases (SQLite & Vector db)
-vendra.db
-vendra.db-journal
+*.db
+*.db-journal
+data/*.db
+vectorstore/
 chroma_db/
 
 # Streamlit config/cache
@@ -32,3 +34,8 @@ static/images/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Frontend (Next.js fallback)
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local

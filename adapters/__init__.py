@@ -1,5 +1,6 @@
 from config import ADAPTER
 from adapters.json_adapter import JSONAdapter
+from adapters.postgres_adapter import PostgresAdapter
 from adapters.shopify_adapter import ShopifyAdapter
 from adapters.woocommerce_adapter import WooCommerceAdapter
 
@@ -10,6 +11,8 @@ def get_adapter():
     adapter_name = str(ADAPTER).lower().strip()
     if adapter_name == "json":
         return JSONAdapter()
+    elif adapter_name == "postgres":
+        return PostgresAdapter()
     elif adapter_name == "shopify":
         return ShopifyAdapter()
     elif adapter_name == "woocommerce":

@@ -1,0 +1,10 @@
+.venv_vendra/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.gitignore
+.env
+.pytest_cache/
+tests/

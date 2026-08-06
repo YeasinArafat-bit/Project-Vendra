@@ -5,8 +5,129 @@ import datetime
 import streamlit as st
 from langchain_core.messages import HumanMessage, AIMessage
 
-from agent.graph import graph
-from agent.tools import adapter, CARTS, confirm_payment, update_cart_activity
+API_URL = os.getenv("API_URL", "http://localhost:8000")
+
+def get_auth_headers() -> dict:
+    token = st.session_state.get("session_token")
+    if token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
+
+def api_get_cart(cart_id: str) -> list:
+    try:
+        res = requests.get(f"{API_URL}/api/cart/{cart_id}", headers=get_auth_headers())
+        if res.status_code == 200:
+            return res.json().get("items", [])
+    except Exception as e:
+        st.error(f"Error fetching cart: {e}")
+    return []
+
+def api_add_to_cart(cart_id: str, product_id: str, size: str, quantity: int = 1) -> bool:
+    try:
+        payload = {"product_id": product_id, "size": size, "quantity": quantity}
+        res = requests.post(f"{API_URL}/api/cart/{cart_id}/add", json=payload, headers=get_auth_headers())
+        if res.status_code != 200:
+            st.error(f"Failed to add item: {res.text}")
+        return res.status_code == 200
+    except Exception as e:
+        st.error(f"Error adding to cart: {e}")
+    return False
+
+
+
+def api_get_customer(customer_id: str) -> dict:
+    try:
+        res = requests.get(f"{API_URL}/api/customers/{customer_id}", headers=get_auth_headers())
+        if res.status_code == 200:
+            return res.json()
+    except Exception as e:
+        st.error(f"Error fetching customer: {e}")
+    return {}
+
+def api_get_product_details(product_id: str) -> dict:
+    try:
+        res = requests.get(f"{API_URL}/api/products/{product_id}/details", headers=get_auth_headers())
+        if res.status_code == 200:
+            return res.json()
+    except Exception as e:
+        st.error(f"Error fetching product details: {e}")
+    return {}
+
+def api_get_inventory() -> dict:
+    try:
+        res = requests.get(f"{API_URL}/api/inventory", headers=get_auth_headers())
+        if res.status_code == 200:
+            return res.json()
+    except Exception as e:
+        st.error(f"Error fetching inventory: {e}")
+    return {}
+
+def api_list_orders(customer_id: str) -> list:
+    try:
+        res = requests.get(f"{API_URL}/api/orders?customer_id={customer_id}", headers=get_auth_headers())
+        if res.status_code == 200:
+            return res.json().get("orders", [])
+    except Exception as e:
+        st.error(f"Error fetching orders: {e}")
+    return []
+
+def api_simulate_payment(order_id: str) -> bool:
+    try:
+        payload = {"order_id": order_id, "stripe_event_id": f"evt_mock_direct_{order_id}", "mock": True}
+        res = requests.post(f"{API_URL}/webhook/stripe", json=payload, headers=get_auth_headers())
+        return res.status_code == 200
+    except Exception as e:
+        st.error(f"Error simulating payment: {e}")
+    return False
+
+def call_chat_api(messages: list, customer_id: str, cart_id: str, current_order_id: str = None, active_node: str = "general", intent: str = "general", image_bytes: bytes = None) -> dict:
+    import base64
+    
+    # Serialize messages list
+    serialized_history = []
+    for m in messages:
+        content = get_string_content(m.content)
+        if isinstance(m, HumanMessage):
+            serialized_history.append({"role": "user", "content": content})
+        elif isinstance(m, AIMessage):
+            serialized_history.append({"role": "assistant", "content": content})
+            
+    # Base64 encode visual image if present
+    img_b64 = None
+    if image_bytes:
+        img_b64 = base64.b64encode(image_bytes).decode("utf-8")
+        
+    payload = {
+        "message": serialized_history[-1]["content"] if serialized_history else "",
+        "history": serialized_history[:-1] if len(serialized_history) > 1 else [],
+        "customer_id": customer_id,
+        "image_bytes": img_b64,
+        "active_node": active_node,
+        "intent": intent,
+        "current_order_id": current_order_id
+    }
+    
+    res = requests.post(f"{API_URL}/api/chat", json=payload, headers=get_auth_headers())
+    if res.status_code != 200:
+        raise Exception(f"Backend chat API failed: {res.text}")
+        
+    data = res.json()
+    # Reconstruct langchain message objects
+    msg_objs = []
+    for msg in data.get("messages", []):
+        role = msg.get("role")
+        content = msg.get("content")
+        if role == "user":
+            msg_objs.append(HumanMessage(content=content))
+        elif role == "assistant":
+            msg_objs.append(AIMessage(content=content))
+            
+    return {
+        "messages": msg_objs,
+        "active_node": data.get("active_node"),
+        "intent": data.get("intent"),
+        "current_order_id": data.get("current_order_id")
+    }
 
 def get_string_content(content) -> str:
     if isinstance(content, str):
@@ -122,7 +243,7 @@ def parse_message_for_products(content: str):
             
     return intro_text, products, after_text
 
-def render_product_cards(products, inventory, key_prefix=""):
+def render_product_cards(products, inventory, cart_id: str, key_prefix=""):
     if not products:
         return
 
@@ -153,12 +274,18 @@ def render_product_cards(products, inventory, key_prefix=""):
             inventory.get(product["id"], {}).items()
             if int(qty) > 0
         ]
+        import html
         sizes_text = ", ".join(available_sizes) if available_sizes else "Out of stock"
         tags_text = " · ".join(product.get("mood_tags", [])[:3])
         img_url = product.get("image_url", "")
 
+        escaped_name = html.escape(str(product.get("name", "")))
+        escaped_tags = html.escape(str(tags_text))
+        escaped_sizes = html.escape(str(sizes_text))
+        escaped_img_url = html.escape(str(img_url))
+
         img_html = (
-            f"<img src='{img_url}' style='width:100%; height:160px;"
+            f"<img src='{escaped_img_url}' style='width:100%; height:160px;"
             f"object-fit:cover; border-radius:12px 12px 0 0;'/>"
             if img_url else
             "<div style='width:100%; height:160px; display:flex;"
@@ -182,7 +309,7 @@ def render_product_cards(products, inventory, key_prefix=""):
                             margin-bottom:3px;
                             white-space:nowrap; overflow:hidden;
                             text-overflow:ellipsis;">
-                    {tags_text}
+                    {escaped_tags}
                 </div>
                 <div style="font-size:13px; font-weight:700;
                             color:#1a1a1a; margin-bottom:4px;
@@ -191,7 +318,7 @@ def render_product_cards(products, inventory, key_prefix=""):
                             -webkit-line-clamp:2;
                             -webkit-box-orient:vertical;
                             overflow:hidden;">
-                    {product["name"]}
+                    {escaped_name}
                 </div>
                 <div style="font-size:17px; font-weight:800;
                             color:#2563eb; margin-bottom:4px;">
@@ -201,7 +328,7 @@ def render_product_cards(products, inventory, key_prefix=""):
                             margin-bottom:2px;
                             white-space:nowrap; overflow:hidden;
                             text-overflow:ellipsis;">
-                    📦 {sizes_text}
+                    📦 {escaped_sizes}
                 </div>
             </div>
         </div>
@@ -214,29 +341,13 @@ def render_product_cards(products, inventory, key_prefix=""):
                 key=f"cart_{key_prefix}_{product['id']}_{i}",
                 use_container_width=True
             ):
-                if "cart" not in st.session_state:
-                    st.session_state.cart = []
-                st.session_state.cart.append(product)
-                cart_id = st.session_state["cart_id"]
-                if cart_id not in CARTS:
-                    CARTS[cart_id] = []
                 size_to_add = available_sizes[0] if available_sizes else "9"
-                existing = next(
-                    (item for item in CARTS[cart_id]
-                     if item["product_id"] == product["id"]
-                     and item["size"] == size_to_add), None
-                )
-                if existing:
-                    existing["quantity"] += 1
-                else:
-                    CARTS[cart_id].append({
-                        "product_id": product["id"],
-                        "size": size_to_add,
-                        "quantity": 1
-                    })
-                update_cart_activity(cart_id)
-                st.success(f"✅ {product['name']} added to cart!")
-                st.rerun()
+                if api_add_to_cart(cart_id, product["id"], size_to_add, 1):
+                    if "cart" not in st.session_state:
+                        st.session_state.cart = []
+                    st.session_state.cart.append(product)
+                    st.success(f"✅ {product['name']} added to cart!")
+                    st.rerun()
 
 
 # Set Page Config
@@ -361,14 +472,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize Session States
+if "session_token" not in st.session_state:
+    st.session_state["session_token"] = None
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 if "cart" not in st.session_state:
     st.session_state["cart"] = []
 if "customer_id" not in st.session_state:
-    st.session_state["customer_id"] = "C001"
+    st.session_state["customer_id"] = None
 if "cart_id" not in st.session_state:
-    st.session_state["cart_id"] = f"cart_{st.session_state['customer_id']}"
+    st.session_state["cart_id"] = None
 if "uploaded_image_bytes" not in st.session_state:
     st.session_state["uploaded_image_bytes"] = None
 if "current_order_id" not in st.session_state:
@@ -378,12 +491,73 @@ if "active_node" not in st.session_state:
 if "intent" not in st.session_state:
     st.session_state["intent"] = "general"
 
+if st.session_state["session_token"] is None:
+    st.markdown("<h1 style='text-align: center;'>Welcome to Vendra Shoe Store</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Please login or create an account to start shopping and chatting with Vendra.</p>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        tab1, tab2 = st.tabs(["🔐 Login", "📝 Sign Up"])
+        
+        with tab1:
+            login_email = st.text_input("Email", key="login_email")
+            login_password = st.text_input("Password", type="password", key="login_password")
+            if st.button("Log In", use_container_width=True):
+                if not login_email or not login_password:
+                    st.error("Please enter both email and password.")
+                else:
+                    try:
+                        res = requests.post(f"{API_URL}/api/auth/login", json={"email": login_email, "password": login_password})
+                        if res.status_code == 200:
+                            data = res.json()
+                            st.session_state["session_token"] = data["token"]
+                            st.session_state["customer_id"] = data["customer_id"]
+                            st.session_state["cart_id"] = f"cart_{data['customer_id']}"
+                            st.success(f"Welcome back, {data['name']}!")
+                            st.rerun()
+                        else:
+                            st.error(f"Login failed: {res.json().get('detail', 'Invalid email or password')}")
+                    except Exception as e:
+                        st.error(f"Error connecting to backend: {e}")
+                        
+        with tab2:
+            signup_name = st.text_input("Full Name", key="signup_name")
+            signup_email = st.text_input("Email Address", key="signup_email")
+            signup_password = st.text_input("Password", type="password", key="signup_password")
+            signup_phone = st.text_input("Phone Number (Optional)", key="signup_phone")
+            signup_address = st.text_input("Delivery Address (Optional)", key="signup_address")
+            
+            if st.button("Sign Up", use_container_width=True):
+                if not signup_name or not signup_email or not signup_password:
+                    st.error("Name, email, and password are required.")
+                else:
+                    try:
+                        res = requests.post(f"{API_URL}/api/auth/signup", json={
+                            "name": signup_name,
+                            "email": signup_email,
+                            "password": signup_password,
+                            "phone": signup_phone,
+                            "address": signup_address
+                        })
+                        if res.status_code == 200:
+                            data = res.json()
+                            st.session_state["session_token"] = data["token"]
+                            st.session_state["customer_id"] = data["customer_id"]
+                            st.session_state["cart_id"] = f"cart_{data['customer_id']}"
+                            st.success(f"Account created successfully! Welcome, {data['name']}!")
+                            st.rerun()
+                        else:
+                            st.error(f"Signup failed: {res.json().get('detail', 'Could not create account')}")
+                    except Exception as e:
+                        st.error(f"Error connecting to backend: {e}")
+    st.stop()
+
 # Handle query parameters (product selection and cart additions from card clicks)
 if "select_product" in st.query_params:
     selected_prod_id = st.query_params["select_product"]
     st.query_params.clear()
     
-    prod_details = adapter.get_product_details(selected_prod_id)
+    prod_details = api_get_product_details(selected_prod_id)
     if prod_details:
         user_message = f"Tell me more about {prod_details['name']} (ID: {selected_prod_id}), including available sizes and colors."
         st.session_state["messages"].append(HumanMessage(content=user_message))
@@ -393,10 +567,10 @@ if "add_to_cart" in st.query_params:
     prod_id = st.query_params["add_to_cart"]
     st.query_params.clear()
     
-    prod_details = adapter.get_product_details(prod_id)
+    prod_details = api_get_product_details(prod_id)
     if prod_details:
         # Get first available size
-        inventory = getattr(adapter, "inventory", {})
+        inventory = api_get_inventory()
         available_sizes = [
             size for size, qty in 
             inventory.get(prod_id, {}).items() 
@@ -409,31 +583,19 @@ if "add_to_cart" in st.query_params:
             st.session_state.cart = []
         st.session_state.cart.append(prod_details)
         
-        # Sync with Vendra's CARTS manager
+        # Sync with Vendra's CARTS manager via API
         cart_id = st.session_state["cart_id"]
-        if cart_id not in CARTS:
-            CARTS[cart_id] = []
-            
-        existing = next((item for item in CARTS[cart_id] if item["product_id"] == prod_id and item["size"] == size_to_add), None)
-        if existing:
-            existing["quantity"] += 1
-        else:
-            CARTS[cart_id].append({
-                "product_id": prod_id,
-                "size": size_to_add,
-                "quantity": 1
-            })
-        update_cart_activity(cart_id)
-        st.success(f"Added {prod_details['name']} to cart!")
-        st.rerun()
+        if api_add_to_cart(cart_id, prod_id, size_to_add, 1):
+            st.success(f"Added {prod_details['name']} to cart!")
+            st.rerun()
 
 def get_sidebar_data():
     cust_id = st.session_state["customer_id"]
     cart_id = st.session_state["cart_id"]
     
-    cust = next((c for c in adapter.customers if c["id"] == cust_id), None)
+    cust = api_get_customer(cust_id)
     
-    cart_items = CARTS.get(cart_id, [])
+    cart_items = api_get_cart(cart_id)
     cart_details = []
     cart_total = 0.0
     for item in cart_items:
@@ -441,7 +603,7 @@ def get_sidebar_data():
         size = item["size"]
         qty = item["quantity"]
         
-        details = adapter.get_product_details(prod_id)
+        details = api_get_product_details(prod_id)
         if details:
             subtotal = details["price"] * qty
             cart_total += subtotal
@@ -453,7 +615,7 @@ def get_sidebar_data():
                 "subtotal": subtotal
             })
             
-    orders = [o for o in adapter.orders.values() if o["customer_id"] == cust_id]
+    orders = api_list_orders(cust_id)
     try:
         orders.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     except Exception:
@@ -477,35 +639,27 @@ def simulate_webhook_payment(order_id: str):
             st.rerun()
         else:
             st.error(f"FastAPI Webhook endpoint failed: {response.text}")
-    except Exception:
-        res = confirm_payment(order_id, f"evt_mock_direct_{order_id}")
-        st.success(f"Direct Adapter Payment simulated! Order #{order_id} marked as PAID. {res}")
-        st.rerun()
+    except Exception as e:
+        if api_simulate_payment(order_id):
+            st.success(f"Direct Adapter Payment simulated! Order #{order_id} marked as PAID.")
+            st.rerun()
+        else:
+            st.error(f"Payment simulation failed: {e}")
 
 # --- SIDEBAR PRESENTATION ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3159/3159066.png", width=65)
     st.markdown("<h2 style='margin-top: 0;'>Vendra Assistant</h2>", unsafe_allow_html=True)
     
-    cust_options = [c["id"] for c in adapter.customers]
-    if not cust_options:
-        cust_options = ["C001", "C002", "C003", "C004", "C005"]
-    default_idx = 0
-    if st.session_state.get("customer_id") in cust_options:
-        default_idx = cust_options.index(st.session_state["customer_id"])
-        
-    selected_cust_id = st.selectbox(
-        "Select Active Customer Profile:",
-        options=cust_options,
-        index=default_idx
-    )
-    if selected_cust_id != st.session_state["customer_id"]:
-        st.session_state["customer_id"] = selected_cust_id
-        st.session_state["cart_id"] = f"cart_{selected_cust_id}"
-        st.rerun()
-        
     if customer:
         st.markdown(f"👤 **Customer Profile**\n- **Name:** {customer['name']}\n- **Email:** {customer['email']}\n- **ID:** {customer['id']}")
+        if st.button("🚪 Log Out", use_container_width=True):
+            st.session_state["session_token"] = None
+            st.session_state["customer_id"] = None
+            st.session_state["cart_id"] = None
+            st.session_state["messages"] = []
+            st.session_state["cart"] = []
+            st.rerun()
         
     st.markdown("---")
     
@@ -525,22 +679,22 @@ with st.sidebar:
             
             st.session_state["messages"].append(HumanMessage(content="[Visual Search Photo Uploaded]"))
             
-            state_input = {
-                "messages": st.session_state["messages"],
-                "customer_id": st.session_state["customer_id"],
-                "cart_id": st.session_state["cart_id"],
-                "current_order_id": st.session_state["current_order_id"],
-                "image_bytes": file_bytes,
-                "active_node": "browsing",
-                "intent": "browsing"
-            }
-            
             with st.spinner("Comparing visual CLIP embeddings..."):
-                output = graph.invoke(state_input)
-                
-            st.session_state["messages"] = list(output["messages"])
-            st.session_state["active_node"] = output.get("active_node")
-            st.session_state["intent"] = output.get("intent")
+                try:
+                    output = call_chat_api(
+                        messages=st.session_state["messages"],
+                        customer_id=st.session_state["customer_id"],
+                        cart_id=st.session_state["cart_id"],
+                        current_order_id=st.session_state["current_order_id"],
+                        active_node="browsing",
+                        intent="browsing",
+                        image_bytes=file_bytes
+                    )
+                    st.session_state["messages"] = list(output["messages"])
+                    st.session_state["active_node"] = output.get("active_node")
+                    st.session_state["intent"] = output.get("intent")
+                except Exception as e:
+                    st.error(f"Failed to communicate with Vendra backend: {e}")
             st.rerun()
             
     st.markdown("---")
@@ -605,9 +759,9 @@ for msg_idx, msg in enumerate(st.session_state["messages"]):
                 if intro:
                     st.markdown(intro)
                 
-                # Fetch inventory details from adapter
-                inventory = getattr(adapter, "inventory", {})
-                render_product_cards(products, inventory, key_prefix=f"msg_{msg_idx}")
+                # Fetch inventory details via API
+                inventory = api_get_inventory()
+                render_product_cards(products, inventory, st.session_state["cart_id"], key_prefix=f"msg_{msg_idx}")
                 if after:
                     st.markdown(after)
             else:
@@ -625,19 +779,20 @@ if st.session_state["messages"] and isinstance(
     st.session_state["messages"][-1], HumanMessage
 ):
     with st.spinner("Vendra is thinking..."):
-        state_input = {
-            "messages": st.session_state["messages"],
-            "customer_id": st.session_state["customer_id"],
-            "cart_id": st.session_state["cart_id"],
-            "current_order_id": st.session_state["current_order_id"],
-            "image_bytes": st.session_state["uploaded_image_bytes"],
-            "active_node": st.session_state["active_node"],
-            "intent": st.session_state["intent"]
-        }
-        output = graph.invoke(state_input)
-
-    st.session_state["messages"] = list(output["messages"])
-    st.session_state["active_node"] = output.get("active_node")
-    st.session_state["intent"] = output.get("intent")
-    st.session_state["current_order_id"] = output.get("current_order_id")
+        try:
+            output = call_chat_api(
+                messages=st.session_state["messages"],
+                customer_id=st.session_state["customer_id"],
+                cart_id=st.session_state["cart_id"],
+                current_order_id=st.session_state["current_order_id"],
+                active_node=st.session_state["active_node"],
+                intent=st.session_state["intent"],
+                image_bytes=st.session_state["uploaded_image_bytes"]
+            )
+            st.session_state["messages"] = list(output["messages"])
+            st.session_state["active_node"] = output.get("active_node")
+            st.session_state["intent"] = output.get("intent")
+            st.session_state["current_order_id"] = output.get("current_order_id")
+        except Exception as e:
+            st.error(f"Failed to communicate with Vendra backend: {e}")
     st.rerun()

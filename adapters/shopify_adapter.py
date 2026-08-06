@@ -234,3 +234,15 @@ class ShopifyAdapter(BaseAdapter):
 
     def get_store_credit(self, customer_id: str) -> float:
         return 0.0
+
+    def create_refund_request(self, order_id: str, customer_id: str, refund_type: str, eligibility_reason: str, thread_id: str) -> dict:
+        return {}
+
+    def get_refund_request(self, request_id: str) -> dict:
+        return {}
+
+    def get_pending_refund_requests(self) -> list:
+        return []
+
+    def update_refund_request(self, request_id: str, status: str, reviewed_by: str, review_notes: str) -> bool:
+        return True
