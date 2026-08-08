@@ -35,6 +35,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 import uuid
 from agent.logging_config import ctx_customer_id, ctx_request_id, ctx_agent_name
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -623,3 +626,34 @@ def list_orders(customer_id: str, request: Request, authenticated_customer_id: s
     orders_list = list(adapter.orders.values())
     filtered = [o for o in orders_list if o["customer_id"] == customer_id]
     return {"orders": filtered}
+
+@app.get("/api/orders/{order_id}/tracking")
+@limiter.limit("60/minute")
+def get_order_tracking(order_id: str, request: Request, authenticated_customer_id: str = Depends(get_current_customer_id)):
+    from agent.tools import adapter
+    tracking_data = adapter.track_order(order_id, authenticated_customer_id)
+    if "error" in tracking_data:
+        if "Access denied" in tracking_data["error"] or "Refused" in tracking_data["error"]:
+            raise HTTPException(status_code=403, detail=tracking_data["error"])
+        else:
+            raise HTTPException(status_code=404, detail=tracking_data["error"])
+            
+    if not tracking_data:
+        # Fallback tracking info if not in db but exists
+        orders_dict = adapter.orders
+        ord_obj = orders_dict.get(order_id)
+        if not ord_obj:
+            raise HTTPException(status_code=404, detail=f"Order {order_id} not found.")
+        if ord_obj.get("customer_id") != authenticated_customer_id:
+            raise HTTPException(status_code=403, detail="Access denied. You do not own this order.")
+        return {
+            "order_id": order_id,
+            "courier": "Pending",
+            "tracking_code": "Pending",
+            "status": ord_obj.get("status", "pending_payment"),
+            "estimated_delivery": None,
+            "timeline": [
+                {"time": ord_obj.get("created_at"), "event": "Order placed, awaiting processing."}
+            ]
+        }
+    return tracking_data

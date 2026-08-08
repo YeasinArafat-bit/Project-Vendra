@@ -93,6 +93,8 @@ export default function Home() {
   const [inventory, setInventory] = useState<Record<string, Record<string, number>>>({});
   const [productDetailsMap, setProductDetailsMap] = useState<Record<string, Product>>({});
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
+  const [modalSelectedSize, setModalSelectedSize] = useState<string>("");
 
   // Graph/Conversational states
   const [activeNode, setActiveNode] = useState("general");
@@ -154,9 +156,31 @@ export default function Home() {
     }
   }, [errorMsg, successMsg]);
 
+  useEffect(() => {
+    if (selectedProduct) {
+      const prodInventory = inventory[selectedProduct.id] || {};
+      const availableSizes = Object.entries(prodInventory)
+        .filter(([_, qty]) => qty > 0)
+        .map(([sz]) => sz);
+      setModalSelectedSize(availableSizes[0] || "");
+    } else {
+      setModalSelectedSize("");
+    }
+  }, [selectedProduct, inventory]);
+
   // Helper Headers
   const getAuthHeaders = (): Record<string, string> => {
     return token ? { "Authorization": `Bearer ${token}` } : {};
+  };
+
+  const getFullImageUrl = (url?: string) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+      return url;
+    }
+    const cleanApiUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+    return `${cleanApiUrl}${cleanUrl}`;
   };
 
   const getAdminHeaders = (): Record<string, string> => {
@@ -323,29 +347,15 @@ export default function Home() {
   const fetchTracking = async (orderId: string) => {
     if (trackingDetails[orderId]) return;
     try {
-      // In Vendra, tracking information can be fetched from the orders array or timeline tools.
-      // We check if adapter has tracking info mapped.
-      const res = await fetch(`${API_URL}/api/orders?customer_id=${customerId}`, {
+      const res = await fetch(`${API_URL}/api/orders/${orderId}/tracking`, {
         headers: getAuthHeaders(),
       });
       if (res.ok) {
-        const data = await res.json();
-        const ord = data.orders?.find((o: any) => o.id === orderId);
-        if (ord && ord.tracking_code) {
-          // Mock some tracking status
-          setTrackingDetails(prev => ({
-            ...prev,
-            [orderId]: {
-              courier: "Steadfast Courier",
-              tracking_code: ord.tracking_code,
-              status: ord.status === "paid" ? "in_transit" : "pending",
-              timeline: [
-                { status: "Created", timestamp: ord.created_at, note: "Order placed successfully." },
-                { status: "Processing", timestamp: ord.created_at, note: "Payment confirmed." }
-              ]
-            }
-          }));
-        }
+        const trackingData = await res.json();
+        setTrackingDetails(prev => ({
+          ...prev,
+          [orderId]: trackingData
+        }));
       }
     } catch (err) {
       console.error("Error fetching tracking:", err);
@@ -819,7 +829,7 @@ export default function Home() {
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-4">
-                <div className="p-4 rounded-full bg-indigo-650/10 border border-indigo-500/20 text-indigo-400 animate-pulse">
+                <div className="p-4 rounded-full bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 animate-pulse">
                   <MessageSquare className="h-10 w-10" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-200">Hi, I'm Vendra!</h3>
@@ -856,35 +866,71 @@ export default function Home() {
                   {/* Render Product Cards for recommendations directly below bubbles */}
                   {m.role === "assistant" && getProductCardsForMessage(m.content).length > 0 && (
                     <div className="grid grid-cols-1 gap-4 mt-3 w-full sm:grid-cols-2 max-w-[90%]">
-                      {getProductCardsForMessage(m.content).map((prod) => (
-                        <div key={prod.id} className="group overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg hover:border-indigo-500/40 hover:bg-slate-950 transition-all duration-300">
-                          {prod.image_url ? (
-                            <img src={prod.image_url} alt={prod.name} className="h-28 w-full rounded-lg object-cover mb-3 group-hover:scale-[1.03] transition-transform duration-300" />
-                          ) : (
-                            <div className="h-28 w-full bg-slate-900 rounded-lg flex items-center justify-center text-slate-600 text-xs mb-3">No Image</div>
-                          )}
-                          <div className="flex items-start justify-between">
-                            <h4 className="font-bold text-slate-200 text-xs truncate group-hover:text-indigo-400 transition-colors">{prod.name}</h4>
-                            <span className="text-xs font-bold text-indigo-400">{formatBDT(prod.price)}</span>
+                      {getProductCardsForMessage(m.content).map((prod) => {
+                        const prodInventory = inventory[prod.id] || {};
+                        const availableSizes = Object.entries(prodInventory)
+                          .filter(([_, qty]) => qty > 0)
+                          .map(([sz]) => sz);
+                        const currentSelectedSize = selectedSizes[prod.id] || availableSizes[0] || "";
+
+                        return (
+                          <div key={prod.id} className="group overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg hover:border-indigo-500/40 hover:bg-slate-950 transition-all duration-300">
+                            {prod.image_url ? (
+                              <img src={getFullImageUrl(prod.image_url)} alt={prod.name} className="h-28 w-full rounded-lg object-cover mb-3 group-hover:scale-[1.03] transition-transform duration-300" />
+                            ) : (
+                              <div className="h-28 w-full bg-slate-900 rounded-lg flex items-center justify-center text-slate-600 text-xs mb-3">No Image</div>
+                            )}
+                            <div className="flex items-start justify-between">
+                              <h4 className="font-bold text-slate-200 text-xs truncate group-hover:text-indigo-400 transition-colors">{prod.name}</h4>
+                              <span className="text-xs font-bold text-indigo-400">{formatBDT(prod.price)}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-1 line-clamp-2 h-7">{prod.description}</p>
+                            
+                            {/* Size Dropdown */}
+                            <div className="mt-2 flex items-center justify-between gap-1.5 text-[11px]">
+                              <span className="text-slate-500 font-medium">Size:</span>
+                              <select
+                                value={currentSelectedSize}
+                                onChange={(e) => setSelectedSizes(prev => ({ ...prev, [prod.id]: e.target.value }))}
+                                className="bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-0"
+                              >
+                                {Object.keys(prodInventory).length === 0 ? (
+                                  <option value="">No stock data</option>
+                                ) : (
+                                  Object.entries(prodInventory).map(([sz, qty]) => (
+                                    <option key={sz} value={sz} disabled={qty <= 0}>
+                                      {sz} {qty <= 0 ? "(Out of stock)" : `(${qty} left)`}
+                                    </option>
+                                  ))
+                                )}
+                              </select>
+                            </div>
+
+                            <div className="flex gap-2 mt-3">
+                              <button
+                                disabled={!currentSelectedSize}
+                                onClick={() => {
+                                  if (currentSelectedSize) {
+                                    handleAddToCart(prod.id, currentSelectedSize);
+                                  } else {
+                                    setErrorMsg("Please select an in-stock size.");
+                                  }
+                                }}
+                                className="flex-1 text-[10px] bg-indigo-600 hover:bg-indigo-500 font-semibold p-1.5 rounded-lg text-white shadow transition-colors disabled:opacity-50"
+                              >
+                                🛒 Add to Cart
+                              </button>
+                              <button
+                                onClick={() => setSelectedProduct(prod)}
+                                className="p-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs flex items-center justify-center"
+                                title="Product Info"
+                              >
+                                <Info className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
-                          <p className="text-[10px] text-slate-500 mt-1 line-clamp-2 h-7">{prod.description}</p>
-                          <div className="flex gap-2 mt-3">
-                            <button
-                              onClick={() => handleAddToCart(prod.id, "9")}
-                              className="flex-1 text-[10px] bg-indigo-650 hover:bg-indigo-500 font-semibold p-1.5 rounded-lg text-white shadow transition-colors"
-                            >
-                              🛒 Add to Cart
-                            </button>
-                            <button
-                              onClick={() => setSelectedProduct(prod)}
-                              className="p-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs flex items-center justify-center"
-                              title="Product Info"
-                            >
-                              <Info className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -947,7 +993,7 @@ export default function Home() {
               onClick={() => setActiveTab("chat")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "chat" 
-                  ? "bg-slate-900 border border-slate-750 text-indigo-400" 
+                  ? "bg-slate-900 border border-slate-700 text-indigo-400" 
                   : "text-slate-400 hover:text-slate-300"
               }`}
             >
@@ -958,7 +1004,7 @@ export default function Home() {
               onClick={() => setActiveTab("cart")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all relative ${
                 activeTab === "cart" 
-                  ? "bg-slate-900 border border-slate-750 text-indigo-400" 
+                  ? "bg-slate-900 border border-slate-700 text-indigo-400" 
                   : "text-slate-400 hover:text-slate-300"
               }`}
             >
@@ -974,7 +1020,7 @@ export default function Home() {
               onClick={() => setActiveTab("orders")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "orders" 
-                  ? "bg-slate-900 border border-slate-750 text-indigo-400" 
+                  ? "bg-slate-900 border border-slate-700 text-indigo-400" 
                   : "text-slate-400 hover:text-slate-300"
               }`}
             >
@@ -985,7 +1031,7 @@ export default function Home() {
               onClick={() => setActiveTab("profile")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "profile" 
-                  ? "bg-slate-900 border border-slate-750 text-indigo-400" 
+                  ? "bg-slate-900 border border-slate-700 text-indigo-400" 
                   : "text-slate-400 hover:text-slate-300"
               }`}
             >
@@ -996,7 +1042,7 @@ export default function Home() {
               onClick={() => setActiveTab("admin")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "admin" 
-                  ? "bg-slate-900 border border-slate-750 text-indigo-400" 
+                  ? "bg-slate-900 border border-slate-700 text-indigo-400" 
                   : "text-slate-400 hover:text-slate-300"
               }`}
             >
@@ -1034,7 +1080,7 @@ export default function Home() {
                         <div key={idx} className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/40 p-4">
                           <div className="flex items-center gap-3">
                             {details?.image_url ? (
-                              <img src={details.image_url} alt={item.name} className="h-14 w-14 rounded-lg object-cover" />
+                              <img src={getFullImageUrl(details.image_url)} alt={item.name} className="h-14 w-14 rounded-lg object-cover" />
                             ) : (
                               <div className="h-14 w-14 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-slate-500">No Image</div>
                             )}
@@ -1119,7 +1165,7 @@ export default function Home() {
                           {o.status === "pending_payment" && (
                             <button
                               onClick={() => handleSimulatePayment(o.id)}
-                              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-650 hover:bg-emerald-500 p-2.5 text-xs font-semibold text-white transition-colors"
+                              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 p-2.5 text-xs font-semibold text-white transition-colors"
                             >
                               <DollarSign className="h-4 w-4" />
                               Simulate Stripe Payment Check (Mock)
@@ -1134,15 +1180,17 @@ export default function Home() {
                                 <span className="text-[10px] text-slate-400">Courier: {tracking.courier}</span>
                               </div>
                               <div className="space-y-3">
-                                {tracking.timeline.map((evt: any, eidx: number) => (
+                                {tracking.timeline?.map((evt: any, eidx: number) => (
                                   <div key={eidx} className="flex gap-2.5">
                                     <div className="flex flex-col items-center">
                                       <div className="h-2 w-2 rounded-full bg-indigo-500 mt-1.5" />
                                       {eidx < tracking.timeline.length - 1 && <div className="w-0.5 bg-slate-800 flex-1 my-1" />}
                                     </div>
                                     <div>
-                                      <strong className="text-xs text-slate-200 font-bold block">{evt.status}</strong>
-                                      <span className="text-[10px] text-slate-500 block">{evt.note}</span>
+                                      <strong className="text-xs text-slate-200 font-bold block">{evt.event || evt.status}</strong>
+                                      <span className="text-[10px] text-slate-500 block">
+                                        {evt.time ? new Date(evt.time).toLocaleString() : evt.note}
+                                      </span>
                                     </div>
                                   </div>
                                 ))}
@@ -1272,7 +1320,7 @@ export default function Home() {
                             <div className="flex gap-3">
                               <button
                                 onClick={() => handleApproveRefund(req.id)}
-                                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-650 hover:bg-emerald-500 p-2.5 text-xs font-bold text-white transition-colors"
+                                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 p-2.5 text-xs font-bold text-white transition-colors"
                               >
                                 <Check className="h-4 w-4" />
                                 Approve Refund
@@ -1310,14 +1358,14 @@ export default function Home() {
               </div>
               <button 
                 onClick={() => setSelectedProduct(null)}
-                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-slate-300 transition-colors"
+                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-300 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             
             {selectedProduct.image_url ? (
-              <img src={selectedProduct.image_url} alt={selectedProduct.name} className="h-56 w-full rounded-xl object-cover" />
+              <img src={getFullImageUrl(selectedProduct.image_url)} alt={selectedProduct.name} className="h-56 w-full rounded-xl object-cover" />
             ) : (
               <div className="h-56 w-full bg-slate-950 rounded-xl flex items-center justify-center text-slate-500 text-xs">No Image Available</div>
             )}
@@ -1331,7 +1379,7 @@ export default function Home() {
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Category Tags</span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {selectedProduct.tags?.map((t, idx) => (
-                    <span key={idx} className="text-[9px] bg-slate-850 px-2 py-0.5 rounded border border-slate-700 text-slate-400 font-semibold">{t}</span>
+                    <span key={idx} className="text-[9px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700 text-slate-400 font-semibold">{t}</span>
                   )) || <span className="text-[9px] text-slate-600 italic">None</span>}
                 </div>
               </div>
@@ -1342,15 +1390,48 @@ export default function Home() {
               <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-950">{selectedProduct.description}</p>
             </div>
 
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-500 block mb-2">Select Size</span>
+              <div className="flex flex-wrap gap-2">
+                {Object.keys(inventory[selectedProduct.id] || {}).length === 0 ? (
+                  <span className="text-xs text-slate-500 italic">No stock data available</span>
+                ) : (
+                  Object.entries(inventory[selectedProduct.id] || {}).map(([sz, qty]) => {
+                    const isOutOfStock = qty <= 0;
+                    const isSelected = modalSelectedSize === sz;
+                    return (
+                      <button
+                        key={sz}
+                        disabled={isOutOfStock}
+                        onClick={() => setModalSelectedSize(sz)}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                          isOutOfStock 
+                            ? "bg-slate-900 border-slate-800 text-slate-600 opacity-40 cursor-not-allowed line-through" 
+                            : isSelected
+                              ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/30"
+                              : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                        }`}
+                      >
+                        Size {sz} {isOutOfStock ? "(0)" : `(${qty})`}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <button
+                disabled={!modalSelectedSize}
                 onClick={() => {
-                  handleAddToCart(selectedProduct.id, "9");
-                  setSelectedProduct(null);
+                  if (modalSelectedSize) {
+                    handleAddToCart(selectedProduct.id, modalSelectedSize);
+                    setSelectedProduct(null);
+                  }
                 }}
-                className="flex-1 rounded-xl bg-indigo-650 hover:bg-indigo-500 p-3 text-xs font-bold text-white transition-colors"
+                className="flex-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 p-3 text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:pointer-events-none"
               >
-                🛒 Add Size 9 To Cart
+                🛒 Add {modalSelectedSize ? `Size ${modalSelectedSize}` : ""} to Cart
               </button>
             </div>
           </div>

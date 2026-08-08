@@ -4,7 +4,7 @@ This changelog summarizes the modifications made to Vendra's conversational comm
 
 ---
 
-## [2026-08-06] PHASE 7 — Professional Next.js Frontend
+## [2026-08-06] PHASE 7 — Professional Next.js Frontend & Bug Fixes
 
 ### Added
 - Created a fully decoupled web application in the `frontend` folder using Next.js (App Router), TypeScript, and Tailwind CSS.
@@ -16,6 +16,11 @@ This changelog summarizes the modifications made to Vendra's conversational comm
 - Built an Admin Refund Review Panel that connects to `/api/refunds/pending` using the server's `ADMIN_API_KEY`, supporting inline Approve/Deny actions.
 - Configured optimized standalone Next.js builds and packaged the frontend application into a custom production Docker container.
 - Updated `docker-compose.yml` to incorporate the Next.js service on port 3000 with a custom Node-based healthcheck.
+
+### Fixed
+- **Bug 1 (No Size Selector)**: Replaced the hardcoded size `"9"` with dynamic size-selectors: added an inline size picker dropdown to the chat product cards and a premium button grid selector to the product details modal, populated dynamically from the `/api/inventory` stock.
+- **Bug 2 (Mock/Broken Order Tracking)**: Replaced mock order tracking with a real backend endpoint (`GET /api/orders/{order_id}/tracking`) that enforces customer ownership, and updated the frontend order tracking pane to render database-backed multi-step timeline events. Added comprehensive test coverage in `tests/test_tracking_api.py`.
+- **Bug 3 (Broken Relative Image Paths)**: Resolved relative image URL issues by mounting the backend's `static/` folder using FastAPI `StaticFiles` in `main.py`, and introduced a frontend helper `getFullImageUrl` to prefix all relative image paths with the backend's `API_URL`.
 
 ---
 
