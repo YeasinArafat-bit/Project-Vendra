@@ -178,3 +178,126 @@ def test_create_order_insufficient_stock_fails_fast():
     assert elapsed < 0.5
     assert "checkout failed" in res.lower()
     assert "insufficient stock" in res.lower()
+
+def test_order_routing_and_tool_hallucination(monkeypatch):
+    """
+    Verify that:
+    1. 'show my orders' and phrasing variants route to tracking intent.
+    2. A simulated tool hallucination (400 error) in catalog node triggers re-routing.
+    """
+    from agent.graph import router_node, ToolHallucinationError
+    
+    # 1. Test routing of "show my orders" and phrasing variants
+    phrases = ["show my orders", "my orders", "order history", "show orders", "list orders"]
+    for phrase in phrases:
+        state_input = {
+            "messages": [HumanMessage(content=phrase)],
+            "customer_id": "C001",
+            "cart_id": "cart_C001",
+            "active_node": "general",
+            "intent": "general"
+        }
+        res = router_node(state_input)
+        assert res["intent"] == "tracking", f"Expected '{phrase}' to route to tracking, got {res['intent']}"
+        assert res["active_node"] == "tracking"
+
+    # 2. Test re-routing upon ToolHallucinationError in browse_node
+    from agent.graph import catalog_graph, tracking_graph, browse_node
+    
+    original_catalog_invoke = catalog_graph.invoke
+    original_tracking_invoke = tracking_graph.invoke
+    
+    def mock_catalog_invoke(*args, **kwargs):
+        raise ToolHallucinationError("Simulated 400 Bad Request tool_use_failed brave_search")
+        
+    def mock_tracking_invoke(state, *args, **kwargs):
+        # Return a mock response from tracking subgraph
+        return {
+            **state,
+            "messages": state["messages"] + [AIMessage(content="Here are your orders: ORD123, ORD456.")]
+        }
+        
+    monkeypatch.setattr(catalog_graph, "invoke", mock_catalog_invoke)
+    monkeypatch.setattr(tracking_graph, "invoke", mock_tracking_invoke)
+    
+    state_input = {
+        "messages": [HumanMessage(content="show my orders")],
+        "customer_id": "C001",
+        "cart_id": "cart_C001",
+        "current_order_id": "",
+        "selected_product_id": "",
+        "selected_size": "",
+        "active_node": "browsing",
+        "intent": "browsing"
+    }
+    
+    output = browse_node(state_input)
+    
+    # Verify that the output has the re-routed tracking message
+    last_msg = output["messages"][-1]
+    assert isinstance(last_msg, AIMessage)
+    assert "Let me check your order status for you." in last_msg.content
+    assert "ORD123" in last_msg.content
+    assert output["active_node"] == "tracking"
+
+
+def test_conversational_tracking_flow():
+    """
+    Test that sends "where is my order" -> "ORD002" as a two-turn conversation
+    through the actual orchestrator/tracking subgraph and asserts the second
+    response contains real tracking content (courier name, status, or timeline data).
+    """
+    import uuid
+    from agent.graph import graph
+    from agent.tools import adapter
+    
+    # Seed ORD002
+    adapter.orders["ORD002"] = {
+        "id": "ORD002",
+        "customer_id": "C001",
+        "items": [{"product_id": "P001", "size": "10", "quantity": 1, "price": 4500.0}],
+        "total": 4500.0,
+        "status": "paid",
+        "stripe_payment_intent_id": "pi_mock_222",
+        "created_at": "2026-07-01T15:00:00Z"
+    }
+    adapter.tracking["ORD002"] = {
+        "order_id": "ORD002",
+        "courier": "Steadfast",
+        "tracking_code": "SF-9982718",
+        "status": "in_transit",
+        "estimated_delivery": "2026-07-04T18:00:00Z",
+        "timeline": [
+            {"time": "2026-07-01T15:00:00Z", "event": "Order placed and payment confirmed"},
+            {"time": "2026-07-02T10:00:00Z", "event": "Package picked up by courier"}
+        ]
+    }
+    
+    thread_id = f"test_convo_{uuid.uuid4().hex}"
+    config = {"configurable": {"thread_id": thread_id}}
+    
+    # Turn 1
+    state1 = {
+        "messages": [HumanMessage(content="where is my order")],
+        "customer_id": "C001",
+        "cart_id": "cart_C001"
+    }
+    res1 = graph.invoke(state1, config)
+    last_msg1 = res1["messages"][-1]
+    assert "order ID" in last_msg1.content or "Order ID" in last_msg1.content
+    
+    # Turn 2
+    state2 = {
+        "messages": res1["messages"] + [HumanMessage(content="ORD002")],
+        "customer_id": "C001",
+        "cart_id": "cart_C001"
+    }
+    res2 = graph.invoke(state2, config)
+    last_msg2 = res2["messages"][-1]
+    
+    # Asserts that response contains courier or status or timeline data
+    content = last_msg2.content
+    assert "Steadfast" in content or "SF-9982718" in content or "IN_TRANSIT" in content or "Timeline" in content
+    assert "PAID" in content or "P001" in content or "4500" in content
+
+

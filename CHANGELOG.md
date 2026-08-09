@@ -4,6 +4,36 @@ This changelog summarizes the modifications made to Vendra's conversational comm
 
 ---
 
+## [2026-08-09] PHASE 9 — Conversational Tracking Loop Fix & Language Defaulting
+
+### Added
+- Created `test_conversational_tracking_flow` in [`tests/test_fault_isolation.py`](file:///G:/Project%20Vendra/tests/test_fault_isolation.py) to simulate a multi-turn conversation ("where is my order" -> "ORD002") and assert that it returns complete tracking details.
+- Added strict response template formatting constraints to [`tracking_agent_node`](file:///G:/Project%20Vendra/agent/graph.py#L580) in [`agent/graph.py`](file:///G:/Project%20Vendra/agent/graph.py) to force `llama-3.1-8b-instant` to populate courier name, status, timeline events, and order details rather than presenting follow-up questions or loops.
+- Enforced input-based tool visibility: dynamically hide `tools` (`track_order`/`get_order_status`) in [`tracking_agent_node`](file:///G:/Project%20Vendra/agent/graph.py#L580) when no valid order ID matches in the message history, preventing tool-eagerness/hallucinations on the initial turn.
+- Included `Customer ID: {cid}` directly in `track_order` and `get_order_status` tool responses in [`agent/tools.py`](file:///G:/Project%20Vendra/agent/tools.py) to supply explicit customer verification context.
+
+### Fixed
+- **Conversational Tracking Loop Bug:** Resolved the issue where the model refused to output tracking details due to a paranoid interpretation of Rule 4 (Privacy Lock). Updated Rule 4 in [`agent/prompts.py`](file:///G:/Project%20Vendra/agent/prompts.py) to declare system context Customer IDs pre-verified. Suppressed tool binding when a `ToolMessage` is the last message in the subgraph to ensure the model focuses purely on rendering the retrieved details.
+- **Bangla Greeting Defaulting Bug:** Updated Rule 2 (Language Detection) in [`agent/prompts.py`](file:///G:/Project%20Vendra/agent/prompts.py) and the system prompt in [`general_agent_node`](file:///G:/Project%20Vendra/agent/graph.py#L699) to default to English. The system now strictly avoids switching to Bengali or Banglish unless explicitly greeted or asked questions in those languages.
+
+---
+
+## [2026-08-09] PHASE 8 — LLM Rate-Limiting Mitigation & Routing Hardening
+
+### Added
+- Implemented custom retry logic for ChatGroq API invocations with a fixed short backoff (2s then 5s) for rate limit `429 Too Many Requests` errors and a hard ceiling of 15 seconds total retry time per request, failing fast when exceeded.
+- Added `ToolHallucinationError` to intercept model hallucinations when calling nonexistent/unbound tools (like `brave_search`).
+- Registered `ToolHallucinationError` and `RuntimeError` as excluded exceptions on `llm_breaker` to prevent false positive circuit breaker trips.
+- Created orchestrator-level re-routing inside `run_subgraph_safely` that intercepts `ToolHallucinationError`, parses the last user query against intent keywords, and executes the correct sub-agent graph inline with a friendly transition message.
+- Defined module-level keyword lists for all intents (`TRACKING_WORDS`, `CANCELLATION_WORDS`, `CART_WORDS`, `CHECKOUT_WORDS`, `BROWSING_WORDS`, `GREETING_WORDS`, `GENERAL_WORDS`) to standardize parsing.
+- Refactored `router_node` to check the deterministic keyword lists first, and automatically bypass LLM-based intent classification for continuing conversational turns when an `active_node` is set.
+- Added comprehensive unit tests in `tests/test_fault_isolation.py` verifying both order status phrasing classification and the automated re-routing logic for tool hallucinations.
+
+### Changed
+- Removed `"return policy"` and `"refund policy"` from `CANCELLATION_WORDS` and added them to `GENERAL_WORDS` to ensure general policy questions route to the general agent rather than cancellation flow.
+
+---
+
 ## [2026-08-06] PHASE 7 — Professional Next.js Frontend & Bug Fixes
 
 ### Added

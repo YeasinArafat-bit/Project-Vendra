@@ -844,7 +844,7 @@ def track_order(order_id: str, customer_id: str) -> str:
         )
         
         return (
-            f"Order Tracking Details (ID: {oid}):\n"
+            f"Order Tracking Details (ID: {oid}, Customer ID: {cid}):\n"
             f"Courier: {tracking_info.get('courier', 'N/A')}\n"
             f"Tracking Code: {tracking_info.get('tracking_code', 'N/A')}\n"
             f"Status: {tracking_info.get('status', 'N/A').upper()}\n"
@@ -888,7 +888,7 @@ def get_order_status(order_id: str, customer_id: str) -> str:
             
         items_str = ", ".join(f"{item['quantity']}x product {item['product_id']} (size {item['size']})" for item in order.get("items", []))
         return (
-            f"Order Details (ID: {oid}):\n"
+            f"Order Details (ID: {oid}, Customer ID: {cid}):\n"
             f"Date: {order.get('created_at')}\n"
             f"Status: {order.get('status').upper()}\n"
             f"Items: [{items_str}]\n"
