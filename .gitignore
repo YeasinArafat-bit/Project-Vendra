@@ -19,6 +19,8 @@ ENV/
 # Local Databases (SQLite & Vector db)
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 data/*.db
 vectorstore/
 chroma_db/

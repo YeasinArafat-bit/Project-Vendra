@@ -275,6 +275,8 @@ export default function Home() {
         data.items?.forEach((item: CartItem) => {
           fetchProductDetails(item.product_id);
         });
+      } else if (res.status === 401) {
+        handleLogout();
       }
     } catch (err) {
       console.error("Error fetching cart:", err);
@@ -294,6 +296,8 @@ export default function Home() {
         data.orders?.forEach((o: Order) => {
           fetchTracking(o.id);
         });
+      } else if (res.status === 401) {
+        handleLogout();
       }
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -309,6 +313,8 @@ export default function Home() {
       if (res.ok) {
         const data = await res.json();
         setActiveCustomer(data);
+      } else if (res.status === 401) {
+        handleLogout();
       }
     } catch (err) {
       console.error("Error fetching profile:", err);
@@ -356,6 +362,8 @@ export default function Home() {
           ...prev,
           [orderId]: trackingData
         }));
+      } else if (res.status === 401) {
+        handleLogout();
       }
     } catch (err) {
       console.error("Error fetching tracking:", err);
@@ -379,8 +387,12 @@ export default function Home() {
         setSuccessMsg("Product added to cart!");
         setActiveTab("cart");
       } else {
-        const data = await res.json();
-        setErrorMsg(data.detail || "Could not add item to cart.");
+        if (res.status === 401) {
+          handleLogout();
+        } else {
+          const data = await res.json();
+          setErrorMsg(data.detail || "Could not add item to cart.");
+        }
       }
     } catch (err) {
       setErrorMsg("Failed to connect to backend server.");
@@ -401,8 +413,12 @@ export default function Home() {
         await fetchCart();
         setSuccessMsg("Item removed from cart.");
       } else {
-        const data = await res.json();
-        setErrorMsg(data.detail || "Could not remove item.");
+        if (res.status === 401) {
+          handleLogout();
+        } else {
+          const data = await res.json();
+          setErrorMsg(data.detail || "Could not remove item.");
+        }
       }
     } catch (err) {
       setErrorMsg("Failed to connect to backend.");
@@ -430,8 +446,12 @@ export default function Home() {
         setSuccessMsg(`Simulated payment successful! Order #${orderId} marked as PAID.`);
         await fetchOrders();
       } else {
-        const data = await res.json();
-        setErrorMsg(data.detail || "Stripe mock payment declined.");
+        if (res.status === 401) {
+          handleLogout();
+        } else {
+          const data = await res.json();
+          setErrorMsg(data.detail || "Stripe mock payment declined.");
+        }
       }
     } catch (err) {
       setErrorMsg("Failed to process payment webhook.");
@@ -526,8 +546,12 @@ export default function Home() {
           fetchOrders();
         }
       } else {
-        const errText = await res.text();
-        setErrorMsg(`Failed to chat: ${errText}`);
+        if (res.status === 401) {
+          handleLogout();
+        } else {
+          const errText = await res.text();
+          setErrorMsg(`Failed to chat: ${errText}`);
+        }
       }
     } catch (err) {
       setErrorMsg("Failed to connect to backend server.");
@@ -860,7 +884,13 @@ export default function Home() {
                       : "bg-slate-900/90 text-slate-100 rounded-bl-none border border-slate-800/80 shadow-md"
                   }`}>
                     {/* Safe text format mapping */}
-                    <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+                    <div className="whitespace-pre-wrap leading-relaxed">
+                      {m.content
+                        .replace(/\[PRODUCTS:[\s\S]*?\]/g, "")
+                        .replace(/<!--[\s\S]*?-->/g, "")
+                        .replace(/\n\n+/g, "\n\n")
+                        .trim()}
+                    </div>
                   </div>
 
                   {/* Render Product Cards for recommendations directly below bubbles */}

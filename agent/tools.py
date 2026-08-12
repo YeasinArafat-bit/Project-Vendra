@@ -32,7 +32,7 @@ def validate_shoe_size(size: str) -> bool:
     return bool(re.match(r"^[a-zA-Z0-9\s.-]+$", str(size).strip()))
 
 # Circuit Breakers
-llm_breaker = pybreaker.CircuitBreaker(fail_max=3, reset_timeout=15)
+llm_breaker = pybreaker.CircuitBreaker(fail_max=5, reset_timeout=30)
 stripe_breaker = pybreaker.CircuitBreaker(fail_max=3, reset_timeout=30)
 db_breaker = pybreaker.CircuitBreaker(fail_max=5, reset_timeout=30)
 
@@ -563,14 +563,21 @@ def add_to_cart(cart_id: str, product_id: str, size: str, customer_id: str, quan
         for item in CARTS[cid]:
             if item["product_id"] == pid and item["size"] == sz:
                 item["quantity"] = total_requested
+                item["price"] = details.get("price", 0.0)
+                item["subtotal"] = total_requested * item["price"]
+                item["name"] = details.get("name", "Shoe")
                 updated = True
                 break
         
         if not updated:
+            price = details.get("price", 0.0)
             CARTS[cid].append({
                 "product_id": pid,
+                "name": details.get("name", "Shoe"),
                 "size": sz,
-                "quantity": quantity
+                "quantity": quantity,
+                "price": price,
+                "subtotal": quantity * price
             })
             
         return f"Successfully added {quantity} units of '{details['name']}' (Size {sz}) to cart."
@@ -637,14 +644,15 @@ def view_cart(cart_id: str, customer_id: str) -> str:
         return f"Error viewing cart: {str(e)}"
 
 @tool
-def remove_from_cart(cart_id: str, product_id: str, customer_id: str) -> str:
+def remove_from_cart(cart_id: str, product_id: str, customer_id: str, size: Optional[str] = None) -> str:
     """
-    Remove an entire product line (matching product ID) from the cart.
+    Remove items (matching product ID and optionally size) from the cart.
     
     Args:
         cart_id: Unique identifier of the shopping cart.
         product_id: The product ID to remove.
         customer_id: The customer ID requesting this removal.
+        size: Optional shoe size to remove. If omitted, all sizes of this product are removed.
     """
     cid = str(cart_id).strip()
     pid = str(product_id).strip()
@@ -672,12 +680,18 @@ def remove_from_cart(cart_id: str, product_id: str, customer_id: str) -> str:
         product_name = details.get("name", f"ID: {pid}")
         
         original_len = len(CARTS[cid])
-        CARTS[cid] = [item for item in CARTS[cid] if item["product_id"] != pid]
-        
-        if len(CARTS[cid]) < original_len:
-            return f"Removed '{product_name}' from your cart."
+        if size:
+            sz = str(size).strip()
+            CARTS[cid] = [item for item in CARTS[cid] if not (item["product_id"] == pid and item["size"] == sz)]
         else:
-            return f"Item '{product_name}' was not found in your cart."
+            CARTS[cid] = [item for item in CARTS[cid] if item["product_id"] != pid]
+            
+        if len(CARTS[cid]) < original_len:
+            size_str = f" (Size {size})" if size else ""
+            return f"Removed '{product_name}'{size_str} from your cart."
+        else:
+            size_str = f" with size {size}" if size else ""
+            return f"Item '{product_name}'{size_str} was not found in your cart."
     except AdapterError as e:
         logger.error(f"Adapter error in remove_from_cart: {e}", exc_info=True)
         return "Error: Vendra's external integration service is temporarily unavailable. Please try again later."
@@ -836,8 +850,15 @@ def track_order(order_id: str, customer_id: str) -> str:
     
     try:
         tracking_info = adapter.track_order(oid, cid)
-        if "error" in tracking_info:
-            return tracking_info["error"]
+        # Adapter may return None or an empty dict for a not-found order
+        if not tracking_info:
+            return f"Error: Order #{oid} not found. Please check the order ID and try again."
+        if isinstance(tracking_info, dict) and "error" in tracking_info:
+            err = tracking_info["error"]
+            # Normalise access-denied vs not-found for clean LLM messaging
+            if "access" in str(err).lower() or "denied" in str(err).lower():
+                return "Refused: Access denied. You do not own this order."
+            return f"Error: Order #{oid} not found. Please check the order ID and try again."
             
         timeline_str = "\n".join(
             f"- [{t['time'][:16].replace('T', ' ')}] {t['event']}" for t in tracking_info.get("timeline", [])
@@ -855,8 +876,8 @@ def track_order(order_id: str, customer_id: str) -> str:
         logger.error(f"Adapter error in track_order: {e}", exc_info=True)
         return "Error: Vendra's external integration service is temporarily unavailable. Please try again later."
     except Exception as e:
-        logger.error(f"Error tracking order: {e}", exc_info=True)
-        return f"Error tracking order: {str(e)}"
+        logger.error(f"Error tracking order {oid}: {e}", exc_info=True)
+        return f"Error: Order #{oid} not found. Please check the order ID and try again."
 
 @tool
 def get_order_status(order_id: str, customer_id: str) -> str:
@@ -1124,7 +1145,21 @@ def retrieve_policy_text(query: str) -> str:
         from langchain_core.messages import SystemMessage, HumanMessage
         
         groq_model = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+        secondary_model = os.getenv("SECONDARY_GROQ_MODEL", "llama-3.3-70b-versatile")
         llm = ChatGroq(model=groq_model, temperature=0, groq_api_key=groq_key)
+        
+        llm_fallback = None
+        if secondary_model:
+            llm_fallback = ChatGroq(model=secondary_model, temperature=0, groq_api_key=groq_key)
+            
+        def run_llm(messages):
+            try:
+                return llm.invoke(messages)
+            except Exception as primary_e:
+                if llm_fallback:
+                    logger.warning(f"Primary model {groq_model} failed in retrieve_policy_text: {primary_e}. Falling back to {secondary_model}.")
+                    return llm_fallback.invoke(messages)
+                raise primary_e
         
         # Step 2: Grade retrieved chunks
         relevant_results = []
@@ -1136,7 +1171,7 @@ def retrieve_policy_text(query: str) -> str:
             )
             grader_user = f"Customer Query: {query}\n\nRetrieved Policy Chunk:\n{res['text']}"
             try:
-                grade_res = llm.invoke([
+                grade_res = run_llm([
                     SystemMessage(content=grader_system),
                     HumanMessage(content=grader_user)
                 ])
@@ -1157,7 +1192,7 @@ def retrieve_policy_text(query: str) -> str:
             reformulate_user = f"Original Query: {query}"
             
             try:
-                reform_res = llm.invoke([
+                reform_res = run_llm([
                     SystemMessage(content=reformulate_system),
                     HumanMessage(content=reformulate_user)
                 ])
@@ -1168,7 +1203,7 @@ def retrieve_policy_text(query: str) -> str:
                 new_results = search_policies(new_query, top_k=2)
                 for res in new_results:
                     # Grade new results
-                    grade_res = llm.invoke([
+                    grade_res = run_llm([
                         SystemMessage(content=grader_system),
                         HumanMessage(content=f"Customer Query: {query}\n\nRetrieved Policy Chunk:\n{res['text']}")
                     ])

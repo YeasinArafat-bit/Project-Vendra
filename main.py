@@ -2,6 +2,7 @@ import os
 import json
 import stripe
 import logging
+import re
 from typing import Optional
 from fastapi import FastAPI, Request, Header, HTTPException, Depends, status
 from pydantic import BaseModel
@@ -440,12 +441,47 @@ class ChatRequest(BaseModel):
     intent: Optional[str] = "general"
     image_bytes: Optional[str] = None
 
+def clear_thread_checkpoints(thread_id: str):
+    import sqlite3
+    db_url = os.getenv("DATABASE_URL", "sqlite:///data/vendra.db")
+    if db_url.startswith("sqlite:///"):
+        sqlite_path = db_url.replace("sqlite:///", "")
+        if not sqlite_path or sqlite_path == ":memory:":
+            sqlite_path = "data/vendra.db"
+        try:
+            conn = sqlite3.connect(sqlite_path)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM checkpoints WHERE thread_id = ?", (thread_id,))
+            cursor.execute("DELETE FROM writes WHERE thread_id = ?", (thread_id,))
+            conn.commit()
+            conn.close()
+            logger.info(f"Cleared SQLite checkpoints for thread: {thread_id}")
+        except Exception as e:
+            logger.error(f"Failed to clear checkpoints for thread {thread_id}: {e}")
+    elif db_url.startswith("postgresql"):
+        try:
+            import psycopg2
+            conn_str = db_url.replace("postgresql+psycopg2://", "postgresql://")
+            conn = psycopg2.connect(conn_str)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,))
+            cursor.execute("DELETE FROM writes WHERE thread_id = %s", (thread_id,))
+            conn.commit()
+            conn.close()
+            logger.info(f"Cleared Postgres checkpoints for thread: {thread_id}")
+        except Exception as e:
+            logger.error(f"Failed to clear Postgres checkpoints for thread {thread_id}: {e}")
+
 @app.post("/api/chat")
 @limiter.limit("60/minute")
 async def chat_endpoint(request: Request, payload: ChatRequest, customer_id: str = Depends(get_current_customer_id)):
     if payload.message and len(payload.message) > 3000:
         raise HTTPException(status_code=400, detail="Message exceeds maximum allowed length of 3000 characters.")
         
+    import time
+    from agent.logging_config import ctx_request_start_time
+    ctx_request_start_time.set(time.time())
+    
     ctx_customer_id.set(customer_id)
     ctx_agent_name.set("orchestrator")
     from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
@@ -494,6 +530,9 @@ async def chat_endpoint(request: Request, payload: ChatRequest, customer_id: str
     thread_id = f"thread_{customer_id}"
     config = {"configurable": {"thread_id": thread_id}}
     
+    if not payload.history:
+        clear_thread_checkpoints(thread_id)
+    
     try:
         output = graph.invoke(state_input, config)
     except Exception as e:
@@ -501,15 +540,39 @@ async def chat_endpoint(request: Request, payload: ChatRequest, customer_id: str
         raise HTTPException(status_code=500, detail=f"Agent graph execution failed: {str(e)}")
         
     serialized_messages = []
+    from agent.graph import is_system_prompt_leaked, has_bengali, get_string_content
+    
+    # We find if the last user message had Bengali to enforce the language guard on the final response
+    last_user_message_bengali = False
+    for m in reversed(output.get("messages", [])):
+        if isinstance(m, HumanMessage):
+            last_human_content = get_string_content(m.content)
+            if has_bengali(last_human_content):
+                last_user_message_bengali = True
+            break
+            
     for m in output.get("messages", []):
         if isinstance(m, HumanMessage):
             serialized_messages.append({"role": "user", "content": m.content})
         elif isinstance(m, AIMessage):
-            serialized_messages.append({"role": "assistant", "content": m.content})
+            content = get_string_content(m.content)
+            # Clean any leaked XML tags like <function=...> or </function> or <tool_call>
+            content = re.sub(r'<function=.*?>.*?</function>', '', content, flags=re.DOTALL)
+            content = re.sub(r'<function=.*?>', '', content)
+            content = re.sub(r'<tool_call>.*?</tool_call>', '', content, flags=re.DOTALL)
+            content = re.sub(r'</?tool_call>', '', content)
+            # Check for system prompt leak
+            if is_system_prompt_leaked(content):
+                content = "I cannot fulfill this request. I am here to help you browse shoes, manage your cart, check out, and track orders at Vendra shoe store."
+            # Check for language violation
+            elif not last_user_message_bengali and has_bengali(content):
+                content = "Hello! How can I help you today? I can assist you with catalog browsing, shopping cart management, checkout, and tracking your order."
+            serialized_messages.append({"role": "assistant", "content": content})
         elif isinstance(m, SystemMessage):
             serialized_messages.append({"role": "system", "content": m.content})
         elif isinstance(m, ToolMessage):
             serialized_messages.append({"role": "tool", "content": m.content, "name": m.name, "tool_call_id": m.tool_call_id})
+
             
     return {
         "messages": serialized_messages,
@@ -525,8 +588,24 @@ async def chat_endpoint(request: Request, payload: ChatRequest, customer_id: str
 def get_cart(cart_id: str, request: Request, customer_id: str = Depends(get_current_customer_id)):
     if cart_id != f"cart_{customer_id}":
         raise HTTPException(status_code=403, detail="Forbidden: You do not own this cart.")
-    from agent.tools import CARTS
-    return {"cart_id": cart_id, "items": CARTS.get(cart_id, [])}
+    from agent.tools import CARTS, adapter
+    raw_items = CARTS.get(cart_id, [])
+    enriched_items = []
+    for item in raw_items:
+        item_copy = dict(item)
+        pid = item_copy.get("product_id")
+        qty = item_copy.get("quantity", 1)
+        details = adapter.get_product_details(pid)
+        if details:
+            item_copy["name"] = details.get("name", item_copy.get("name", "Shoe"))
+            item_copy["price"] = details.get("price", 0.0)
+            item_copy["subtotal"] = qty * item_copy["price"]
+        else:
+            item_copy["name"] = item_copy.get("name", "Shoe")
+            item_copy["price"] = item_copy.get("price", 0.0)
+            item_copy["subtotal"] = qty * item_copy["price"]
+        enriched_items.append(item_copy)
+    return {"cart_id": cart_id, "items": enriched_items}
 
 class CartAddRequest(BaseModel):
     product_id: str
@@ -578,14 +657,18 @@ def add_to_cart_endpoint(cart_id: str, payload: CartAddRequest, request: Request
 
 @app.post("/api/cart/{cart_id}/remove")
 @limiter.limit("60/minute")
-def remove_from_cart_endpoint(cart_id: str, product_id: str, request: Request, customer_id: str = Depends(get_current_customer_id)):
+def remove_from_cart_endpoint(cart_id: str, product_id: str, request: Request, customer_id: str = Depends(get_current_customer_id), size: Optional[str] = None):
     if cart_id != f"cart_{customer_id}":
         raise HTTPException(status_code=403, detail="Forbidden: You do not own this cart.")
     from agent.tools import CARTS, update_cart_activity
     cid = cart_id.strip()
     pid = product_id.strip()
     if cid in CARTS:
-        CARTS[cid] = [item for item in CARTS[cid] if item["product_id"] != pid]
+        if size:
+            sz = size.strip()
+            CARTS[cid] = [item for item in CARTS[cid] if not (item["product_id"] == pid and item["size"] == sz)]
+        else:
+            CARTS[cid] = [item for item in CARTS[cid] if item["product_id"] != pid]
         update_cart_activity(cid)
     return {"status": "success", "cart": CARTS.get(cid, [])}
 

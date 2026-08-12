@@ -51,7 +51,13 @@ def main():
     # Step 3: Start FastAPI Webhook server
     print("\n⚡ Starting FastAPI Backend on http://localhost:8000...")
     fastapi_proc = subprocess.Popen([
-        venv_uvicorn, "main:app", "--reload", "--port", "8000", "--workers", "1"
+        venv_uvicorn, "main:app",
+        "--reload",
+        "--port", "8000",
+        "--reload-dir", os.path.join(project_root, "agent"),
+        "--reload-dir", os.path.join(project_root, "adapters"),
+        "--reload-include", "main.py",
+        "--reload-include", "config.py",
     ])
 
     # Wait a second for FastAPI to start up

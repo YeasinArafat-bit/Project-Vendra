@@ -5,6 +5,7 @@ import contextvars
 ctx_agent_name = contextvars.ContextVar("agent_name", default="main_system")
 ctx_customer_id = contextvars.ContextVar("customer_id", default="N/A")
 ctx_request_id = contextvars.ContextVar("request_id", default="N/A")
+ctx_request_start_time = contextvars.ContextVar("request_start_time", default=0.0)
 
 class StructuredFormatter(logging.Formatter):
     def __init__(self):

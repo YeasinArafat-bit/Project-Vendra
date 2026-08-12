@@ -4,6 +4,17 @@ This changelog summarizes the modifications made to Vendra's conversational comm
 
 ---
 
+## [2026-08-12] PHASE 10 — Secondary Model Fallbacks, Topic Switching, & Checkpointer Cleanup
+
+### Added
+- Configured secondary Groq model `SECONDARY_GROQ_MODEL=llama-3.3-70b-versatile` inside [`.env`](file:///G:/Project%20Vendra/.env) and [`.env.example`](file:///G:/Project%20Vendra/.env.example).
+- Implemented a resilient model fallback mechanism in `safe_llm_invoke` inside [`agent/graph.py`](file:///G:/Project%20Vendra/agent/graph.py) and `retrieve_policy_text` inside [`agent/tools.py`](file:///G:/Project%20Vendra/agent/tools.py) that automatically redirects requests to the secondary model upon rate-limiting (429) or other API exceptions.
+- Added `GENERAL_WORDS` into `explicit_switch` triggers inside [`router_node`](file:///G:/Project%20Vendra/agent/graph.py#L502) in [`agent/graph.py`](file:///G:/Project%20Vendra/agent/graph.py) to enable seamless topic switching from cart/checkout flows to policy questions.
+- Integrated automated checkpointer state cleanups on `/api/chat` in [`main.py`](file:///G:/Project%20Vendra/main.py#L533) that deletes SQLite/Postgres checkpoints for the thread whenever the incoming request starts a new session (history is empty).
+- Created a regression test suite [`tests/test_regression_round4.py`](file:///G:/Project%20Vendra/tests/test_regression_round4.py) covering topic switching, rate limits, cart loop prevention, chitchat isolation, and tool-call safety.
+
+---
+
 ## [2026-08-09] PHASE 9 — Conversational Tracking Loop Fix & Language Defaulting
 
 ### Added
