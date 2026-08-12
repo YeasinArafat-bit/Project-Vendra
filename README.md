@@ -181,8 +181,7 @@ To test the system immediately without having to sign up or create new accounts,
 * **Imran Hossain:** `imran@email.bd` *(Customer ID: `C003`)*
 
 ### Admin Panel Key
-To approve or deny pending cancellation refund requests in the Admin Panel interface:
-* **Admin Key:** `test_admin_key` *(configured via `ADMIN_API_KEY` in `.env`)*
+To approve or deny pending cancellation refund requests in the Admin Panel interface, use the value configured in your local `ADMIN_API_KEY` environment variable (generate your own secure key — see Setup instructions above). Do not commit a real key value to this file.
 
 ---
 

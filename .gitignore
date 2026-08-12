@@ -15,12 +15,18 @@ ENV/
 
 # Environment Variables (Sensitive Keys)
 .env
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
 
 # Local Databases (SQLite & Vector db)
 *.db
 *.db-journal
 *.db-shm
 *.db-wal
+*.sqlite
 data/*.db
 vectorstore/
 chroma_db/
