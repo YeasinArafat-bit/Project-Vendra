@@ -5,7 +5,9 @@ import jwt
 from typing import Optional
 
 # Configuration
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "vendra_jwt_secret_9988112233_superkey_length_32")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not JWT_SECRET_KEY:
+    raise RuntimeError("JWT_SECRET_KEY environment variable is required for Vendra customer authentication.")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRY_HOURS = 24
 
