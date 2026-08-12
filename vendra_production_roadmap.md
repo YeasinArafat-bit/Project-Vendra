@@ -25,11 +25,12 @@ This unblocks everything else; do this first.
 
 Split the current single LangGraph graph (`agent/graph.py`) into specialized, isolated sub-agents. Goal: a crash or exception in one capability never breaks another, and never crashes the whole customer conversation.
 
-1. **Define four specialized sub-agents as separate LangGraph subgraphs**, each with its own system prompt, tools, and internal error handling:
+1. **Define five specialized sub-agents as separate LangGraph subgraphs**, each with its own system prompt, tools, and internal error handling:
    - **Catalog Agent** — product search (text + CLIP visual), recommendations, product detail lookups. Wraps `search_products_text`, `search_products_image`, `get_product_details`.
    - **Order & Tracking Agent** — order history lookup, courier/parcel tracking status. Wraps `get_order`, tracking lookups.
    - **Refund & Cancellation Agent** — eligibility check, then **must stop and wait for human approval before executing anything** (see Phase 2 — this is the human-in-the-loop gate). Wraps `check_cancellation_eligibility`, and a new gated `execute_refund` tool that only the approval flow can call.
    - **Checkout & Payment Agent** — cart management, payment link generation, webhook-driven payment confirmation. Wraps `add_to_cart`, `view_cart`, `remove_from_cart`, `create_payment_link`.
+   - **General Agent** — greeting handling, chitchat, and policy FAQ lookups. Wraps `retrieve_policy_text`.
 2. **Top-level Orchestrator node** replaces the current `router_node` — classifies intent (keep the existing hybrid keyword + LLM classification + Bengali/Banglish support, that logic is solid) and dispatches to the correct sub-agent graph.
 3. **Fault isolation at the orchestrator level:** wrap every sub-agent invocation in a try/except. If a sub-agent throws an unhandled exception:
    - Log the full exception with structured logging (agent name, customer_id, conversation state) for alerting/debugging.

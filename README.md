@@ -55,16 +55,17 @@ Vendra uses a **One Backend, Multiple Clients** approach, orchestrating speciali
                |   LangGraph Agent Orchestrator   | (agent/graph.py)
                +----------------+-----------------+
                                 |
-        +-----------------------+-----------------------+
-        |                       |                       |
-        v                       v                       v
-+---------------+       +---------------+       +---------------+
-| Browsing Agent|       |  Cart Agent   |       |Tracking Agent |
-+-------+-------+       +-------+-------+       +-------+-------+
-        |                       |                       |
-        +-----------------------+-----------------------+
-                                |
-                                v
+        +-------+-------+-------+-------+-------+
+        |       |       |       |       |       |
+        v       v       v       v       v       v
+      +-----+ +-----+ +-----+ +-----+ +-----+
+      |Brow-| |Cart | |Track| |Canc-| |Gene-|
+      |sing | |Agent| |Agent| |el   | |ral  |
+      +--+--+ +--+--+ +--+--+ +--+--+ +--+--+
+         |       |       |       |       |
+         +-------+-------+-------+-------+
+                         |
+                         v
                +----------------------------------+
                |      Data Adapter Interface      | (adapters/base.py)
                +----------------+-----------------+
@@ -77,6 +78,13 @@ Vendra uses a **One Backend, Multiple Clients** approach, orchestrating speciali
 | (Local DB)    |       | Adapter       |       | Adapter       |
 +---------------+       +---------------+       +---------------+
 ```
+
+### The 5 Specialized Sub-Agents:
+1. **Catalog/Browsing Agent** (`browsing_agent_node`): Restricts tool usage to catalog search, checking stock, and product details.
+2. **Cart/Checkout Agent** (`checkout_agent_node`): Manages cart actions (adding/removing items, cart views) and payment creation.
+3. **Order & Tracking Agent** (`tracking_agent_node`): Retrieves delivery timelines, status, and tracking metrics.
+4. **Refund & Cancellation Agent** (`cancellation_agent_node`): Validates returns/cancellation rules and queues refund requests.
+5. **General/Policy Agent** (`general_agent_node`): Resolves FAQs, policy lookups, and greetings.
 
 ### Key Technical Specs:
 * **LLM Engine:** Groq API (Primary: `llama-3.1-8b-instant`, Secondary: `llama-3.3-70b-versatile` with automatic rate-limit failovers).
