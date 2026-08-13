@@ -6,7 +6,7 @@
     "phone": "123",
     "address": "Alice St",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C002",
@@ -15,7 +15,7 @@
     "phone": "456",
     "address": "Bob St",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C003",
@@ -24,7 +24,7 @@
     "phone": "01711223344",
     "address": "Dhanmondi, Dhaka",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C004",
@@ -33,7 +33,7 @@
     "phone": "01811223344",
     "address": "Banani, Dhaka",
     "store_credit": 500.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C005",
@@ -42,7 +42,7 @@
     "phone": "01911223344",
     "address": "GEC Circle, Chittagong",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C006",
@@ -51,7 +51,7 @@
     "phone": "01511223344",
     "address": "Zindabazar, Sylhet",
     "store_credit": 1000.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C007",
@@ -60,7 +60,7 @@
     "phone": "01611223344",
     "address": "Rajshahi Court, Rajshahi",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C008",
@@ -69,7 +69,7 @@
     "phone": "01311223344",
     "address": "Sonadanga, Khulna",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C009",
@@ -78,7 +78,7 @@
     "phone": "01411223344",
     "address": "Chashara, Narayanganj",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C010",
@@ -87,7 +87,7 @@
     "phone": "01799887766",
     "address": "Uttara, Dhaka",
     "store_credit": 150.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C011",
@@ -96,7 +96,7 @@
     "phone": "01899887766",
     "address": "Halishahar, Chittagong",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C012",
@@ -105,7 +105,7 @@
     "phone": "01999887766",
     "address": "Shibganj, Sylhet",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C013",
@@ -114,7 +114,7 @@
     "phone": "01599887766",
     "address": "Sathkhira, Khulna",
     "store_credit": 200.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C014",
@@ -123,7 +123,7 @@
     "phone": "01699887766",
     "address": "Agrabad, Chittagong",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C015",
@@ -132,7 +132,7 @@
     "phone": "01399887766",
     "address": "Mirpur, Dhaka",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C016",
@@ -141,7 +141,7 @@
     "phone": "01499887766",
     "address": "Comilla Cantt, Comilla",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C017",
@@ -150,7 +150,7 @@
     "phone": "01722334455",
     "address": "Barisal Sadar, Barisal",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C018",
@@ -159,7 +159,7 @@
     "phone": "01822334455",
     "address": "Mymensingh Town, Mymensingh",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C019",
@@ -168,7 +168,7 @@
     "phone": "01922334455",
     "address": "Cox's Bazar Sadar, Cox's Bazar",
     "store_credit": 0.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   },
   {
     "id": "C020",
@@ -177,6 +177,6 @@
     "phone": "01522334455",
     "address": "Bogra Sadar, Bogra",
     "store_credit": 350.0,
-    "password_hash": "$2b$12$sVDjG8bCkhSRE0ZSIGVksOwPleMJOP.LwoO29xDPeMRrQooURE3le"
+    "password_hash": "$2b$12$T/kCSyjRRuJaQlJEQfxZ4.QJ49pQPAPnmlYC8YciXtFkDVFePUvbO"
   }
 ]

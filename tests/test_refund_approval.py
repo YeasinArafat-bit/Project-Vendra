@@ -140,10 +140,11 @@ def test_cancel_order_tool_does_not_execute_immediately():
     assert pending[0]["order_id"] == "ORD100"
     assert pending[0]["status"] == "pending_review"
 
-def test_admin_api_requires_auth():
+def test_admin_api_requires_auth(monkeypatch):
     """
     Assert that admin endpoints fail with 401 Unauthorized when an invalid or missing API key is sent.
     """
+    monkeypatch.setenv("ADMIN_API_KEY", "admin-default-secret-key-vendra")
     # 1. No key
     res = client.get("/api/refunds/pending")
     assert res.status_code == 401
